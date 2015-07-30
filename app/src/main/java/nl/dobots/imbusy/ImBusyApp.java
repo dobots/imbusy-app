@@ -22,7 +22,7 @@ public class ImBusyApp extends Application {
 
 	private BleExt _ble = new BleExt();
 	private StoredBleDeviceList _bleDeviceList;
-	private Handler _statusTimeoutHandler;
+	private Handler _handler;
 	Runnable _setAvailable = new Runnable() {
 		@Override
 		public void run() {
@@ -48,13 +48,14 @@ public class ImBusyApp extends Application {
 		_instance = this;
 		_context = this.getApplicationContext();
 
-		_statusTimeoutHandler = new Handler();
+		_handler = new Handler();
+		_status = Status.AVAILABLE;
 
 		_bleDeviceList = new StoredBleDeviceList(_context);
 		_bleDeviceList.load();
 
 		this.startService(new Intent(this, CallStateService.class));
-		this.startService(new Intent (this, BleScanService.class));
+		this.startService(new Intent(this, BleScanService.class));
 	}
 
 	public void onOutgoingCall(String number) {
@@ -80,9 +81,9 @@ public class ImBusyApp extends Application {
 
 	public void setStatus(Status status) {
 		Log.d(TAG, "Changed status to " + status);
-		_statusTimeoutHandler.removeCallbacks(_setAvailable);
+		_handler.removeCallbacks(_setAvailable);
 		_status = status;
-		_statusTimeoutHandler.postDelayed(_setAvailable, 10000); // TODO: magic nr
+		_handler.postDelayed(_setAvailable, 10000); // TODO: magic nr
 	}
 
 	public StoredBleDeviceList getBleDeviceList() {
@@ -99,5 +100,9 @@ public class ImBusyApp extends Application {
 
 	public static int getDatabaseVersion() {
 		return DATABASE_VERSION;
+	}
+
+	public Status getStatus() {
+		return _status;
 	}
 }
