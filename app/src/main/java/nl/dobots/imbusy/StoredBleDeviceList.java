@@ -107,9 +107,9 @@ public class StoredBleDeviceList extends HashMap<String, StoredBleDevice> {
 		private static final String KEY_NAME = "name";
 		private static final String KEY_THRESHOLD = "threshold";
 		private static final String DATABASE_CREATE = "create table " + TABLE_NAME + " (" +
-				"address text primary key, " +
-				"name text not null, " +
-				"threshold decimal" +
+				KEY_ADDRESS + " text primary key, " +
+				KEY_NAME + " text not null, " +
+				KEY_THRESHOLD + " real" +
 				");";
 
 		public DatabaseHelper(Context context) {
