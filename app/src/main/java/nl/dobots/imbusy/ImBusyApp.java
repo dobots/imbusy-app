@@ -17,9 +17,11 @@ public class ImBusyApp extends Application {
 	private static final String TAG = ImBusyApp.class.getCanonicalName();
 	private static ImBusyApp _instance;
 	private Context _context;
+	private static final String DATABASE_NAME = "ImBusyDataBase";
+	private static final int DATABASE_VERSION = 1;
 
 	private BleExt _ble = new BleExt();
-	private StoredBleDeviceList _bleDeviceList = new StoredBleDeviceList();
+	private StoredBleDeviceList _bleDeviceList;
 	private Handler _statusTimeoutHandler;
 	Runnable _setAvailable = new Runnable() {
 		@Override
@@ -48,9 +50,8 @@ public class ImBusyApp extends Application {
 
 		_statusTimeoutHandler = new Handler();
 
-		_bleDeviceList = new StoredBleDeviceList();
-		_bleDeviceList.add(new StoredBleDevice("C0:9A:E5:1F:95:23", "whosin"));
-		_bleDeviceList.add(new StoredBleDevice("E0:0B:E5:5C:6B:9B", "bart"));
+		_bleDeviceList = new StoredBleDeviceList(_context);
+		_bleDeviceList.load();
 
 		this.startService(new Intent(this, CallStateService.class));
 		this.startService(new Intent (this, BleScanService.class));
@@ -90,5 +91,13 @@ public class ImBusyApp extends Application {
 
 	public BleExt getBle() {
 		return _ble;
+	}
+
+	public static String getDatabaseName() {
+		return DATABASE_NAME;
+	}
+
+	public static int getDatabaseVersion() {
+		return DATABASE_VERSION;
 	}
 }
