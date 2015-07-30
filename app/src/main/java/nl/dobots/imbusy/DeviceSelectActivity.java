@@ -9,12 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.LogRecord;
 
 import nl.dobots.bluenet.extended.structs.BleDevice;
 import nl.dobots.bluenet.extended.structs.BleDeviceMap;
@@ -45,25 +45,38 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 		_scannedDeviceList = ImBusyApp.getInstance().getBle().getDeviceMap();
 		_scannedDeviceListCopy = new ArrayList<>(_scannedDeviceList.values());
 
+		initListView();
+		initButtons();
+	}
+
+	private void initListView() {
 		_deviceListView = (ListView) findViewById(R.id.deviceListView);
-//		_deviceListAdapter = new DeviceListAdapter(this, R.layout.device_item ,ImBusyApp.getInstance().getBleDeviceList());
 		_deviceListAdapter = new DeviceListAdapter();
 
 		_deviceListView.setAdapter(_deviceListAdapter);
 		// Activate the Click even of the List items
 		_deviceListView.setOnItemClickListener(this);
 
+		// Update the list view every second with newly scanned devices
 		_handler.post(new Runnable() {
 			@Override
 			public void run() {
-				updateList();
+				updateListView();
 				_handler.postDelayed(this, 1000);
 			}
 		});
 	}
 
+	private void initButtons(){
+		final Button doneButton = (Button) findViewById(R.id.doneButton);
+		doneButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				finish();
+			}
+		});
+	}
 
-	private void updateList() {
+	private void updateListView() {
 		_scannedDeviceListCopy = new ArrayList<>(_scannedDeviceList.values());
 		_deviceListAdapter.notifyDataSetChanged();
 	}
@@ -81,8 +94,6 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 			_deviceList.remove(device.getAddress());
 		}
 	}
-
-
 
 	private class DeviceListAdapter extends BaseAdapter {
 

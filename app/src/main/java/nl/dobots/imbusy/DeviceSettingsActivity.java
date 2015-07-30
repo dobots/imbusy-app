@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,6 +35,11 @@ public class DeviceSettingsActivity extends Activity implements AdapterView.OnIt
 		_deviceList = ImBusyApp.getInstance().getBleDeviceList();
 		_deviceListCopy = _deviceList.toList();
 
+		initListView();
+		initButtons();
+	}
+
+	private void initListView() {
 		_deviceListView = (ListView) findViewById(R.id.deviceListView);
 //		_deviceListAdapter = new DeviceListAdapter(this, R.layout.device_item ,ImBusyApp.getInstance().getBleDeviceList());
 		_deviceListAdapter = new DeviceListAdapter();
@@ -44,7 +50,15 @@ public class DeviceSettingsActivity extends Activity implements AdapterView.OnIt
 		_deviceListView.setAdapter(_deviceListAdapter);
 		// Activate the Click even of the List items
 		_deviceListView.setOnItemClickListener(this);
+	}
 
+	private void initButtons(){
+		final Button doneButton = (Button) findViewById(R.id.doneButton);
+		doneButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				finish();
+			}
+		});
 	}
 
 	@Override
