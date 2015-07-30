@@ -82,6 +82,14 @@ public class BleScanService extends Service {
 		return Service.START_STICKY;
 	}
 
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.d(TAG, "onDestroy");
+		// Remove all callbacks and messages that were posted
+		_handler.removeCallbacksAndMessages(null);
+	}
+
 	public void startIntervalScan() {
 		Log.i(TAG, "Starting interval scan");
 		_handler.post(_startScanRunnable);

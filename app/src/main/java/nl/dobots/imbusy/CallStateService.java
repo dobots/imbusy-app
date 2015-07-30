@@ -72,6 +72,14 @@ public class CallStateService extends Service {
 	}
 
 	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.d(TAG, "onDestroy");
+//		// Remove all callbacks and messages that were posted
+//		_handler.removeCallbacksAndMessages(null);
+	}
+
+	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
 	}

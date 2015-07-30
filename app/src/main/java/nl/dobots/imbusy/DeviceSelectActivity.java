@@ -49,6 +49,14 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 		initButtons();
 	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.d(TAG, "onDestroy");
+		// Remove all callbacks and messages that were posted
+		_handler.removeCallbacksAndMessages(null);
+	}
+
 	private void initListView() {
 		_deviceListView = (ListView) findViewById(R.id.deviceListView);
 		_deviceListAdapter = new DeviceListAdapter();

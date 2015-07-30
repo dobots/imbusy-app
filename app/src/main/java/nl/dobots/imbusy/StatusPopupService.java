@@ -65,5 +65,7 @@ public class StatusPopupService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		if (_statusImg != null) _windowManager.removeView(_statusImg);
+//		// Remove all callbacks and messages that were posted
+//		_handler.removeCallbacksAndMessages(null);
 	}
 }
