@@ -1,0 +1,32 @@
+<!--RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				xmlns:tools="http://schemas.android.com/tools"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:paddingLeft="@dimen/activity_horizontal_margin"
+				android:paddingRight="@dimen/activity_horizontal_margin"
+				android:paddingTop="@dimen/activity_vertical_margin"
+				android:paddingBottom="@dimen/activity_vertical_margin"
+				tools:context="nl.dobots.imbusy.DeviceSelectActivity">
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+				xmlns:tools="http://schemas.android.com/tools"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				tools:context="nl.dobots.imbusy.DeviceSelectActivity">
+
+	<Button
+		android:id="@+id/doneButton"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:text="Done"
+		android:background="@drawable/buttonshape"
+		android:textColor="#FFFFFF"/>
+	<ListView
+		android:id="@+id/deviceListView"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/doneButton"
+		android:layout_centerHorizontal="true"
+		android:layout_alignParentBottom="true">
+	</ListView>
+</RelativeLayout>

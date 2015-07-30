@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="nl.dobots.imbusy" >
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <!-- Required to see when the user is being called -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!-- Required to see when the user calls someone -->
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+
+    <!-- Required to show the status when calling -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application
+        android:name=".ImBusyApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".CallStateService"
+            android:icon="@mipmap/ic_launcher"
+            android:label="CallStateService" >
+        </service>
+        <service
+            android:name=".BleScanService"
+            android:icon="@mipmap/ic_launcher"
+            android:label="BleScanService" >
+        </service>
+        <service
+            android:name=".StatusPopupService"
+            android:icon="@mipmap/ic_launcher"
+            android:label="StatusPopupService" >
+        </service>
+
+        <activity
+            android:name=".DeviceSelectActivity"
+            android:label="@string/title_activity_device_select"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nl.dobots.imbusy.MainActivity" />
+        </activity>
+        <activity
+            android:name=".DeviceSettingsActivity"
+            android:label="@string/title_activity_device_settings" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="nl.dobots.imbusy.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>
