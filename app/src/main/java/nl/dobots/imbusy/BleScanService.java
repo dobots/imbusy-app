@@ -15,7 +15,7 @@ import nl.dobots.bluenet.extended.structs.BleDevice;
  * Created by vliedel on 24-7-15.
  */
 public class BleScanService extends Service {
-	private String TAG = BleScanService.class.getCanonicalName();
+	private static final String TAG = BleScanService.class.getCanonicalName();
 	private BleExt _ble;
 	private Handler _handler = new Handler();
 
@@ -78,37 +78,7 @@ public class BleScanService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//The service will at this point continue running until Context.stopService() or stopSelf() is called
-
 		startIntervalScan();
-//		_ble.startEndlessScan(new IBleDeviceCallback() {
-//			@Override
-//			public void onSuccess(BleDevice device) {
-////				Log.i(TAG, device.getAddress());
-//				ImBusyApp.getInstance().onScannedDevice(device);
-//			}
-//
-//			@Override
-//			public void onError(int error) {
-//
-//			}
-//		});
-//		_ble.startEndlessScan(new IDataCallback() {
-//			@Override
-//			public void onData(JSONObject json) {
-//				Log.i(TAG, json.toString());
-//				try {
-//					BleDevice dev = new BleDevice(json);
-//				} catch (JSONException e) {
-//					Log.e(TAG, e.toString());
-//				}
-//			}
-//
-//			@Override
-//			public void onError(int error) {
-//
-//			}
-//		});
-
 		return Service.START_STICKY;
 	}
 
@@ -136,4 +106,40 @@ public class BleScanService extends Service {
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
+
+
+	// TODO: implement this
+//	//BLE Adapter to remember user not to turn BLE off
+//	BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+//	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context context, Intent intent) {
+//			String action = intent.getAction();
+//			// It means the user has changed his bluetooth state.
+//			if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+//				if (btAdapter.getState() == BluetoothAdapter.STATE_TURNING_OFF) {
+//					triggerNotification("Presence can not work without BLE ! Please turn the bluetooth back on when you want to check in or out.");
+//					return;
+//				}
+//			}
+//		}
+//	};
+//
+//	private void triggerNotification(String s) {
+//		final Intent intent = new Intent(this, startingActivity.class);
+//		final PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, 0);
+//		CharSequence message = s;
+//		NotificationManager notificationManager;
+//		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//		Notification notification = new Notification.Builder(this)
+//				.setContentTitle("Presence")
+//				.setContentText(message)
+//				.setSmallIcon(R.mipmap.ic_launcher)
+//				.setContentIntent(contentIntent)
+//				.setDefaults(Notification.DEFAULT_SOUND)
+//				.setLights(Color.BLUE, 500, 1000)
+//				.setAutoCancel(true)
+//				.build();
+//		notificationManager.notify(1011, notification);
+//	}
 }

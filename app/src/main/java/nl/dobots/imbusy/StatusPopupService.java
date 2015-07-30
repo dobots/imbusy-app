@@ -13,7 +13,7 @@ import android.widget.ImageView;
  * Created by Bart van Vliet on 27-7-15.
  */
 public class StatusPopupService extends Service {
-
+	private static final String TAG = StatusPopupService.class.getCanonicalName();
 	private WindowManager _windowManager;
 	private ImageView _statusImg;
 

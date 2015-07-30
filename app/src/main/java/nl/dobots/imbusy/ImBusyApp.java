@@ -14,7 +14,7 @@ import nl.dobots.bluenet.extended.structs.BleDevice;
  */
 
 public class ImBusyApp extends Application {
-	private String TAG = ImBusyApp.class.getCanonicalName();
+	private static final String TAG = ImBusyApp.class.getCanonicalName();
 	private static ImBusyApp _instance;
 	private Context _context;
 

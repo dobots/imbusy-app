@@ -16,7 +16,7 @@ import java.util.Set;
  * Created by Bart van Vliet on 27-7-15.
  */
 public class StoredBleDeviceList extends HashMap<String, StoredBleDevice> {
-	private String TAG = StoredBleDeviceList.class.getCanonicalName();
+	private static final String TAG = StoredBleDeviceList.class.getCanonicalName();
 
 
 	public void add(StoredBleDevice device) {

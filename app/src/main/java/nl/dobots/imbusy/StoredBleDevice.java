@@ -4,6 +4,7 @@ package nl.dobots.imbusy;
  * Created by Bart van Vliet on 27-7-15.
  */
 public class StoredBleDevice {
+	private static final String TAG = StoredBleDevice.class.getCanonicalName();
 	private String _address;
 	private String _name;
 	private float _threshold;

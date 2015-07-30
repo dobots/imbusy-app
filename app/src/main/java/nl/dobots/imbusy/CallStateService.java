@@ -16,7 +16,7 @@ import android.util.Log;
  * Based on: http://www.codeproject.com/Articles/548416/Detecting-incoming-and-outgoing-phone-calls-on-And
  */
 public class CallStateService extends Service {
-	private String TAG = CallStateService.class.getCanonicalName();
+	private static final String TAG = CallStateService.class.getCanonicalName();
 	private TelephonyManager _telephonyManager;
 	private Context _context;
 
