@@ -20,7 +20,7 @@ public class ImBusyApp extends Application {
 	private static final String DATABASE_NAME = "ImBusyDataBase";
 	private static final int DATABASE_VERSION = 1;
 
-	private BleExt _ble = new BleExt();
+	private BleExt _ble;
 	private StoredBleDeviceList _bleDeviceList;
 	private Handler _handler;
 	Runnable _setAvailable = new Runnable() {
@@ -49,13 +49,31 @@ public class ImBusyApp extends Application {
 		_context = this.getApplicationContext();
 
 		_handler = new Handler();
-		_status = Status.AVAILABLE;
 
 		_bleDeviceList = new StoredBleDeviceList(_context);
 		_bleDeviceList.load();
 
+		start();
+	}
+
+	public void start() {
+		_status = Status.AVAILABLE;
+		if (_ble == null) {
+			_ble = new BleExt();
+		}
 		this.startService(new Intent(this, CallStateService.class));
 		this.startService(new Intent(this, BleScanService.class));
+	}
+
+	/** Stop all services
+	 */
+	public void stop() {
+		stopService(new Intent(this, StatusPopupService.class));
+		stopService(new Intent(this, CallStateService.class));
+		stopService(new Intent(this, BleScanService.class));
+		_ble = null;
+//		System.exit(0);
+//		android.os.Process.killProcess(android.os.Process.myPid());
 	}
 
 	public void onOutgoingCall(String number) {

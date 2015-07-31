@@ -86,6 +86,20 @@ public class BleScanService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "onDestroy");
+		if (_ble != null) {
+			_ble.stopScan(new IStatusCallback() {
+				@Override
+				public void onSuccess() {
+
+				}
+
+				@Override
+				public void onError(int error) {
+
+				}
+			});
+		}
+
 		// Remove all callbacks and messages that were posted
 		_handler.removeCallbacksAndMessages(null);
 	}

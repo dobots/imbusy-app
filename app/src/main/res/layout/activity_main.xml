@@ -12,4 +12,14 @@
 		android:id="@+id/status_text"
 		/>
 
+	<Button
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/stop_button"
+		android:id="@+id/stopButton"
+		android:background="@drawable/buttonshape"
+		android:textColor="#FFFFFF"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentEnd="true"/>
+
 </RelativeLayout>

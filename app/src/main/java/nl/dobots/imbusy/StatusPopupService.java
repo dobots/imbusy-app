@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -64,6 +65,7 @@ public class StatusPopupService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		Log.d(TAG, "onDestroy");
 		if (_statusImg != null) _windowManager.removeView(_statusImg);
 //		// Remove all callbacks and messages that were posted
 //		_handler.removeCallbacksAndMessages(null);
