@@ -8,16 +8,16 @@
         android:id="@+id/deviceName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView" android:gravity="center_horizontal" android:paddingLeft="50dp"
+        android:text="DeviceName"
+		android:textAppearance="?android:attr/textAppearanceLarge"
         android:textStyle="bold"
-        android:textSize="20dp"/>
+        android:paddingLeft="50dp"/>
     <TextView
         android:id="@+id/deviceInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="14dp"
-        android:paddingLeft="25dp"
-        android:gravity="center_vertical"/>
+        android:text="Some info\nRssi etc"
+		android:textAppearance="?android:attr/textAppearanceSmall"
+        android:paddingLeft="25dp"/>
 
 </LinearLayout>

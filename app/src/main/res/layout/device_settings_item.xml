@@ -8,16 +8,30 @@
         android:id="@+id/deviceName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView" android:gravity="center_horizontal" android:paddingLeft="50dp"
+        android:text="DeviceName"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textStyle="bold"
-        android:textSize="20dp"/>
+        android:paddingLeft="50dp"/>
     <TextView
         android:id="@+id/deviceInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="14dp"
+        android:text="Some info\nRssi etc"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:paddingLeft="25dp"/>
+    <TextView
+        android:id="@+id/thresholdText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Threshold"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:paddingLeft="25dp"
-        android:gravity="center_vertical"/>
+        android:layout_marginTop="10dp"/>
+    <SeekBar
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/thresholdSlider"
+        android:visibility="visible"
+        android:clickable="false"/>
 
 </LinearLayout>

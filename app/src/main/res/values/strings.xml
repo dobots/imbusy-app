@@ -1,7 +1,10 @@
 <resources>
 	<string name="app_name">ImBusy</string>
 
-	<string name="status_prefix">Status: </string>
+	<string name="stop_button">Stop</string>
+	<string name="done">Done</string>
+
+	<string name="status_prefix">Status:</string>
 	<string name="status_available">Available</string>
 	<string name="status_busy">Busy</string>
 
