@@ -19,6 +19,8 @@ public class CallStateService extends Service {
 	private static final String TAG = CallStateService.class.getCanonicalName();
 	private TelephonyManager _telephonyManager;
 	private Context _context;
+	private OutgoingCallListener _outgoingCallListener;
+	private CallStateListener _callStateListener;
 
 	private class CallStateListener extends PhoneStateListener {
 		@Override
@@ -56,18 +58,21 @@ public class CallStateService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+
+		_outgoingCallListener = new OutgoingCallListener();
+		_callStateListener = new CallStateListener();
+
 		_context = this.getApplicationContext();
 		_telephonyManager = (TelephonyManager)_context.getSystemService(Context.TELEPHONY_SERVICE);
-		_telephonyManager.listen(new CallStateListener(), PhoneStateListener.LISTEN_CALL_STATE);
+		_telephonyManager.listen(_callStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+
+		IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
+		_context.registerReceiver(_outgoingCallListener, intentFilter);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//The service will at this point continue running until Context.stopService() or stopSelf() is called
-
-		IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
-		_context.registerReceiver(new OutgoingCallListener(), intentFilter);
-
 		return Service.START_STICKY;
 	}
 
@@ -75,6 +80,11 @@ public class CallStateService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "onDestroy");
+
+		// Stop listeners
+		_context.unregisterReceiver(_outgoingCallListener);
+		_telephonyManager.listen(_callStateListener, PhoneStateListener.LISTEN_NONE);
+
 //		// Remove all callbacks and messages that were posted
 //		_handler.removeCallbacksAndMessages(null);
 	}
