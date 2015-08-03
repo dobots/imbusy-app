@@ -8,6 +8,7 @@ import android.util.Log;
 
 import nl.dobots.bluenet.extended.BleExt;
 import nl.dobots.bluenet.extended.structs.BleDevice;
+import nl.dobots.bluenet.extended.structs.BleDeviceMap;
 
 /**
  * Created by Bart van Vliet on 24-7-15.
@@ -21,7 +22,7 @@ public class ImBusyApp extends Application {
 	private static final int DATABASE_VERSION = 1;
 
 	private BleExt _ble;
-	private StoredBleDeviceList _bleDeviceList;
+	private StoredBleDeviceList _storedDeviceList;
 	private Handler _handler;
 	Runnable _setAvailable = new Runnable() {
 		@Override
@@ -50,8 +51,8 @@ public class ImBusyApp extends Application {
 
 		_handler = new Handler();
 
-		_bleDeviceList = new StoredBleDeviceList(_context);
-		_bleDeviceList.load();
+		_storedDeviceList = new StoredBleDeviceList(_context);
+		_storedDeviceList.load();
 
 		start();
 	}
@@ -68,6 +69,7 @@ public class ImBusyApp extends Application {
 	/** Stop all services
 	 */
 	public void stop() {
+		_storedDeviceList.save();
 		stopService(new Intent(this, StatusPopupService.class));
 		stopService(new Intent(this, CallStateService.class));
 		stopService(new Intent(this, BleScanService.class));
@@ -92,7 +94,7 @@ public class ImBusyApp extends Application {
 	public void onScannedDevice(BleDevice device) {
 		Log.d(TAG, "Scanned " + device.getAddress() + " (" + device.getRssi() + ") " + device.getName());
 		Log.d(TAG, "scanned device list size = " + _ble.getDeviceMap().size());
-		if (_bleDeviceList.isClose(device.getAddress(), device.getRssi())) {
+		if (_storedDeviceList.isClose(device.getAddress(), device.getRssi())) {
 			setStatus(Status.BUSY);
 		}
 	}
@@ -104,12 +106,19 @@ public class ImBusyApp extends Application {
 		_handler.postDelayed(_setAvailable, 10000); // TODO: magic nr
 	}
 
-	public StoredBleDeviceList getBleDeviceList() {
-		return _bleDeviceList;
+	public StoredBleDeviceList getStoredDeviceList() {
+		return _storedDeviceList;
 	}
 
 	public BleExt getBle() {
 		return _ble;
+	}
+
+	public BleDeviceMap getDeviceMap() {
+		if (_ble != null) {
+			return _ble.getDeviceMap();
+		}
+		return null;
 	}
 
 	public static String getDatabaseName() {

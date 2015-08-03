@@ -26,10 +26,8 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 	protected static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
 
 	private ListView _deviceListView;
-//	private TextView _deviceNameView;
-//	private TextView _deviceInfoView;
 	private DeviceListAdapter _deviceListAdapter;
-	private StoredBleDeviceList _deviceList;
+	private StoredBleDeviceList _storedDeviceList;
 	private BleDeviceMap _scannedDeviceList;
 	private List<BleDevice> _scannedDeviceListCopy;
 
@@ -41,7 +39,7 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_device_select);
 
-		_deviceList = ImBusyApp.getInstance().getBleDeviceList();
+		_storedDeviceList = ImBusyApp.getInstance().getStoredDeviceList();
 		_scannedDeviceList = ImBusyApp.getInstance().getBle().getDeviceMap();
 		_scannedDeviceListCopy = new ArrayList<>(_scannedDeviceList.values());
 
@@ -93,13 +91,13 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		BleDevice device = _scannedDeviceListCopy.get(position);
 		Log.d(TAG, "clicked item " + position + " " + device.getAddress());
-		if (!_deviceList.contains(device.getAddress())) {
+		if (!_storedDeviceList.contains(device.getAddress())) {
 			view.setBackgroundColor(BACKGROUND_SELECTED_COLOR);
-			_deviceList.add(new StoredBleDevice(device.getAddress(), device.getName()));
+			_storedDeviceList.add(new StoredBleDevice(device.getAddress(), device.getName()));
 		}
 		else {
 			view.setBackgroundColor(BACKGROUND_DEFAULT_COLOR);
-			_deviceList.remove(device.getAddress());
+			_storedDeviceList.remove(device.getAddress());
 		}
 	}
 
@@ -141,8 +139,10 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
 				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
 				deviceNameView.setText(device.getName());
-				deviceInfoView.setText(device.getAddress());
-				if (_deviceList.contains(device.getAddress())) {
+				String infoText = getResources().getString(R.string.address_prefix) + " " + device.getAddress();
+				infoText += "\n" + getResources().getString(R.string.rssi_prefix) + " " + device.getRssi();
+				deviceInfoView.setText(infoText);
+				if (_storedDeviceList.contains(device.getAddress())) {
 					convertView.setBackgroundColor(BACKGROUND_SELECTED_COLOR);
 				}
 				else {

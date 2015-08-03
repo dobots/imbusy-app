@@ -10,15 +10,18 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.List;
 
 
 public class DeviceSettingsActivity extends Activity implements AdapterView.OnItemClickListener {
-	protected static final String TAG = DeviceSelectActivity.class.getCanonicalName();
-	protected static final int BACKGROUND_DEFAULT_COLOR = 0x00000000;
-	protected static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
+	private static final String TAG = DeviceSelectActivity.class.getCanonicalName();
+	private static final int BACKGROUND_DEFAULT_COLOR = 0x00000000;
+	private static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
+	private static final int THRESHOLD_SLIDER_MIN = -100;
+
 
 	private ListView _deviceListView;
 //	private TextView _deviceNameView;
@@ -32,7 +35,7 @@ public class DeviceSettingsActivity extends Activity implements AdapterView.OnIt
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_device_settings);
 
-		_deviceList = ImBusyApp.getInstance().getBleDeviceList();
+		_deviceList = ImBusyApp.getInstance().getStoredDeviceList();
 		_deviceListCopy = _deviceList.toList();
 
 		initListView();
@@ -49,7 +52,7 @@ public class DeviceSettingsActivity extends Activity implements AdapterView.OnIt
 
 	private void initListView() {
 		_deviceListView = (ListView) findViewById(R.id.deviceListView);
-//		_deviceListAdapter = new DeviceListAdapter(this, R.layout.device_item ,ImBusyApp.getInstance().getBleDeviceList());
+//		_deviceListAdapter = new DeviceListAdapter(this, R.layout.device_item ,ImBusyApp.getInstance().getStoredDeviceList());
 		_deviceListAdapter = new DeviceListAdapter();
 		Log.d(TAG, "device list:");
 		for (StoredBleDevice dev : _deviceListCopy) {
@@ -112,7 +115,7 @@ public class DeviceSettingsActivity extends Activity implements AdapterView.OnIt
 				convertView = layoutInflater.inflate(R.layout.device_settings_item, null);
 			}
 
-			StoredBleDevice device = (StoredBleDevice)getItem(position);
+			final StoredBleDevice device = (StoredBleDevice)getItem(position);
 			Log.d(TAG, "device view:");
 			Log.d(TAG, device.getAddress());
 
@@ -120,8 +123,35 @@ public class DeviceSettingsActivity extends Activity implements AdapterView.OnIt
 			if (device != null) {
 				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
 				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
+				final TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
+				SeekBar thresholdSlider = (SeekBar)convertView.findViewById(R.id.thresholdSlider);
 				deviceNameView.setText(device.getName());
 				deviceInfoView.setText(device.getAddress());
+
+				float threshold = device.getRssiThreshold();
+//				thresholdView.setText(Float.toString(device.getRssiThreshold())); // annoying format
+//				thresholdView.setText(String.format("%.2f", device.getRssiThreshold())); // trailing zeros
+//				thresholdView.setText(new DecimalFormat("#.#").format(threshold)); // Nice
+				thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(threshold)));
+				thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
+				thresholdSlider.setProgress((int)(device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
+				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+						device.setRssiThreshold((float) (progress + THRESHOLD_SLIDER_MIN));
+						thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(device.getRssiThreshold())));
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+					}
+				});
+
+
 //				if (_deviceList.contains(device.getAddress())) {
 //					convertView.setBackgroundColor(BACKGROUND_SELECTED_COLOR);
 //				}

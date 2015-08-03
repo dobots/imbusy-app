@@ -11,6 +11,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
+import nl.dobots.bluenet.extended.structs.BleDevice;
+import nl.dobots.bluenet.extended.structs.BleDeviceMap;
+
 
 public class MainActivity extends ActionBarActivity {
 	private static final String TAG = MainActivity.class.getCanonicalName();
@@ -24,6 +29,7 @@ public class MainActivity extends ActionBarActivity {
 		ImBusyApp.getInstance().start();
 
 		updateStatus();
+		updateClosestDevice();
 
 		_handler = new Handler();
 
@@ -32,6 +38,7 @@ public class MainActivity extends ActionBarActivity {
 			@Override
 			public void run() {
 				updateStatus();
+				updateClosestDevice();
 				_handler.postDelayed(this, STATUS_POLL_DELAY);
 			}
 		});
@@ -98,13 +105,27 @@ public class MainActivity extends ActionBarActivity {
 				text += getResources().getString(R.string.status_busy);
 				break;
 		}
-		final TextView _statusTextView = (TextView) findViewById(R.id.status_text);
-		_statusTextView.setText(text);
+		final TextView statusTextView = (TextView) findViewById(R.id.status_text);
+		statusTextView.setText(text);
 	}
 
 	private void updateStatus() {
 		if (ImBusyApp.getInstance() != null) {
 			setStatus(ImBusyApp.getInstance().getStatus());
 		}
+	}
+
+	private void updateClosestDevice() {
+		final TextView closestDeviceTextView = (TextView) findViewById(R.id.closest_device);
+		String text = getResources().getString(R.string.closest_device_prefix);
+		BleDeviceMap deviceMap = ImBusyApp.getInstance().getDeviceMap();
+		if (deviceMap != null) {
+			ArrayList<BleDevice> deviceList = deviceMap.getSortedList();
+			if (deviceList != null && deviceList.size() > 0) {
+				BleDevice closestDevice = deviceList.get(0);
+				text += " " + closestDevice.getName() + " (" + closestDevice.getRssi() + " dB)";
+			}
+		}
+		closestDeviceTextView.setText(text);
 	}
 }
