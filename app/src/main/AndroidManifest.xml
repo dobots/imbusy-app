@@ -14,6 +14,11 @@
     <!-- Required to show the status when calling -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <!-- Required to use internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".ImBusyApp"
         android:allowBackup="true"
@@ -44,6 +49,11 @@
             android:name=".StatusPopupService"
             android:icon="@mipmap/ic_launcher"
             android:label="StatusPopupService" >
+        </service>
+        <service
+            android:name=".XmppService"
+            android:icon="@mipmap/ic_launcher"
+            android:label="XmppService" >
         </service>
 
         <activity

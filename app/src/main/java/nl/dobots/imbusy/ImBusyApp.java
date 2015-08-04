@@ -64,6 +64,7 @@ public class ImBusyApp extends Application {
 		}
 		this.startService(new Intent(this, CallStateService.class));
 		this.startService(new Intent(this, BleScanService.class));
+		this.startService(new Intent(this, XmppService.class));
 	}
 
 	/** Stop all services
