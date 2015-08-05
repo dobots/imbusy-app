@@ -35,7 +35,7 @@ public class BleScanService extends Service {
 	private Runnable _startScanRunnable = new Runnable() {
 		@Override
 		public void run() {
-			Log.d(TAG, "Start endless scan");
+//			Log.d(TAG, "Start endless scan");
 			_ble.startScan(_deviceCallback);
 			_handler.postDelayed(_stopScanRunnable, 3000);
 		}
@@ -43,7 +43,7 @@ public class BleScanService extends Service {
 	private Runnable _stopScanRunnable = new Runnable() {
 		@Override
 		public void run() {
-			Log.d(TAG, "Stop endless scan");
+//			Log.d(TAG, "Stop endless scan");
 			_ble.stopScan(new IStatusCallback() {
 				@Override
 				public void onSuccess() {
