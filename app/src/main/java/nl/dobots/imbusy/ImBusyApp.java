@@ -110,8 +110,11 @@ public class ImBusyApp extends Application {
 	}
 
 	public void onScannedDevice(BleDevice device) {
+		if (device == null) {
+			return;
+		}
 		Log.d(TAG, "Scanned " + device.getAddress() + " (" + device.getRssi() + ") " + device.getName());
-		Log.d(TAG, "scanned device list size = " + _ble.getDeviceMap().size());
+//		Log.d(TAG, "scanned device list size = " + _ble.getDeviceMap().size());
 		if (_storedDeviceList.isClose(device.getAddress(), device.getRssi())) {
 			setStatus(Status.BUSY);
 		}
