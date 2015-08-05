@@ -91,6 +91,7 @@ public class ImBusyApp extends Application {
 		stopService(new Intent(this, StatusPopupService.class));
 		stopService(new Intent(this, CallStateService.class));
 		stopService(new Intent(this, BleScanService.class));
+		stopService(new Intent(this, XmppService.class));
 		_ble = null;
 //		System.exit(0);
 //		android.os.Process.killProcess(android.os.Process.myPid());
