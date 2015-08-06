@@ -43,7 +43,7 @@ public class XmppThread {
 	public static final int MSG_FRIENDS_LIST = 31;
 	public static final int MSG_ADD_FRIEND = 32;
 	public static final int MSG_FRIEND_ADDED = 33;
-	public static final int MSG_REM_FRIEND = 34;
+	public static final int MSG_REMOVE_FRIEND = 34;
 	public static final int MSG_FRIEND_REMOVED = 35;
 
 
@@ -85,6 +85,17 @@ public class XmppThread {
 				}
 				case MSG_GET_FRIENDS: {
 					listRoster();
+					break;
+				}
+				case MSG_ADD_FRIEND: {
+					String jid = msg.getData().getString("jid");
+					String nick = msg.getData().getString("nick");
+					addFriend(jid, nick);
+					break;
+				}
+				case MSG_REMOVE_FRIEND: {
+					String jid = msg.getData().getString("jid");
+					removeFriend(jid);
 					break;
 				}
 				default: {
@@ -289,12 +300,31 @@ public class XmppThread {
 		Log.d(TAG, "- End of roster -");
 	}
 
-	private void addRoster(String jid, String nick) {
+	private void addFriend(String jid, String nick) {
+		if (jid == null) {
+			return;
+		}
+		if (nick == null) {
+			nick = getUsername(jid);
+		}
 		try {
 //			_roster.createEntry("name@host.com", "nick", null);
 			_roster.createEntry(jid, nick, null);
 		} catch (Exception e) {
-			Log.e(TAG, "Failed to add entry");
+			Log.e(TAG, "Failed to add entry to roster: " + jid);
+			e.printStackTrace();
+			return;
+		}
+	}
+
+	private void removeFriend(String jid) {
+		if (jid == null) {
+			return;
+		}
+		try {
+			_roster.removeEntry(_roster.getEntry(jid));
+		} catch (Exception e) {
+			Log.e(TAG, "Failed to remove entry from roster" + jid);
 			e.printStackTrace();
 			return;
 		}
