@@ -10,6 +10,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.util.TLSUtils;
 
@@ -21,6 +22,7 @@ public class XmppService extends Service {
 	private static final int STATUS_POLL_DELAY = 500;
 	private XmppThread _xmppThread = null;
 	private Handler _handler;
+	private XmppFriendList _friendList = new XmppFriendList();
 
 	/** Target we give to the xmpp thread to send messages to, handled by MessageHandler. */
 	private final Messenger _messengerIn = new Messenger(new MessageHandler());
@@ -40,6 +42,24 @@ public class XmppService extends Service {
 				}
 				case XmppThread.MSG_CONNECTED: {
 					onXmppConnected();
+					break;
+				}
+				case XmppThread.MSG_FRIEND_ADDED: {
+					String jid = msg.getData().getString("jid");
+					String nick = msg.getData().getString("nick");
+					String mode = msg.getData().getString("mode");
+					onFriendAdded(jid, nick, mode);
+					break;
+				}
+				case XmppThread.MSG_FRIEND_REMOVED: {
+					String jid = msg.getData().getString("jid");
+					onFriendRemoved(jid);
+					break;
+				}
+				case XmppThread.MSG_STATUS: {
+					String jid = msg.getData().getString("jid");
+					String mode = msg.getData().getString("mode");
+					onXmppFriendStatusUpdate(jid, mode);
 					break;
 				}
 				default: {
@@ -126,10 +146,45 @@ public class XmppService extends Service {
 	}
 
 	private void onXmppConnected() {
-		sendMessage(XmppThread.MSG_GET_FRIENDS);
+//		sendMessage(XmppThread.MSG_GET_FRIENDS); // Don't have the roster here yet..
+
 	}
 
+	private void onFriendAdded(String jid, String nick, String presenceMode) {
+//		if (jid == null | nick == null | presenceMode == null) {
+		if (jid == null | presenceMode == null) {
+			return;
+		}
 
+		Presence.Mode mode = XmppThread.getMode(presenceMode);
+		XmppFriend friend = new XmppFriend(jid, nick, mode);
+		_friendList.add(friend);
+
+		Status status = getStatus(mode);
+		ImBusyApp.getInstance().getContactList().add(new PhoneContact(friend.getNumber(), friend.getNick(), status));
+	}
+
+	private void onFriendRemoved(String jid) {
+		if (jid == null) {
+			return;
+		}
+		_friendList.remove(jid);
+	}
+
+	private void onXmppFriendStatusUpdate(String jid, String presenceMode) {
+		if (_friendList.containsKey(jid)) {
+			_friendList.get(jid).setMode(XmppThread.getMode(presenceMode));
+			Log.d(TAG, "Update mode to " + presenceMode);
+		}
+
+		Presence.Mode mode = XmppThread.getMode(presenceMode);
+		PhoneContactList contacts = ImBusyApp.getInstance().getContactList();
+		String number = getNumber(jid);
+		if (contacts.containsKey(number)) {
+			contacts.get(number).setStatus(getStatus(mode));
+			Log.d(TAG, "Update status to " + getStatus(mode));
+		}
+	}
 
 	private void updateStatus() {
 		if (ImBusyApp.getInstance() == null) {
@@ -140,23 +195,12 @@ public class XmppService extends Service {
 		if (status == null) {
 			return;
 		}
-		String xmppModeText;
-		switch (status) {
-			case AVAILABLE:
-				xmppModeText = "available";
-				break;
-			case BUSY:
-				xmppModeText = "dnd";
-				break;
-			default:
-				xmppModeText = "available";
-		}
-
+		String xmppModeText = getMode(status).name();
 		Message msg = Message.obtain(null, XmppThread.MSG_SET_STATUS);
-		Bundle bundle = new Bundle();
-//		bundle.putString("status", "");
-		bundle.putString("mode", xmppModeText);
-		msg.setData(bundle);
+		Bundle data = new Bundle();
+//		data.putString("status", "");
+		data.putString("mode", xmppModeText);
+		msg.setData(data);
 		sendMessage(msg);
 	}
 
@@ -172,5 +216,40 @@ public class XmppService extends Service {
 //		if (_xmppThread != null) {
 //			_xmppThread.stop();
 //		}
+	}
+
+	/** Helper function to convert xmpp presence mode to status */
+	public static final Status getStatus(Presence.Mode mode) {
+		switch (mode) {
+			case away:
+				return Status.BUSY;
+			case xa:
+				return Status.BUSY;
+			case dnd:
+				return Status.BUSY;
+			case chat:
+			case available:
+			default:
+				return Status.AVAILABLE;
+		}
+	}
+
+	/** Helper function to convert status to xmpp presence mode */
+	public static final Presence.Mode getMode(Status status) {
+		switch (status) {
+			case BUSY:
+				return Presence.Mode.dnd;
+			case AVAILABLE:
+			default:
+				return Presence.Mode.available;
+		}
+	}
+
+	public static String getNumber(String jid) {
+		if (!jid.contains("@")) {
+			return null;
+		}
+		String[] split = jid.split("@");
+		return split[0];
 	}
 }

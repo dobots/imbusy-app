@@ -1,5 +1,6 @@
 package nl.dobots.imbusy;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -9,7 +10,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
+import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
@@ -130,6 +133,8 @@ public class XmppThread {
 //		_roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
 		_roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
 
+		_connection.addConnectionListener(new XmppConnectionListener());
+
 		// Give our messenger to the other end
 		Message msg = Message.obtain(null, MSG_REGISTER);
 		msg.replyTo = _messengerIn;
@@ -139,25 +144,92 @@ public class XmppThread {
 	private class XmppRosterListener implements RosterListener {
 		@Override
 		public void entriesAdded(Collection<String> addresses) {
+			for (String address : addresses) {
+				Log.d(TAG, "roster entry added: " + address);
 
+				Message msg = Message.obtain(null, MSG_FRIEND_ADDED);
+				Bundle data = new Bundle();
+				data.putString("jid", address);
+				data.putString("nick", _roster.getEntry(address).getName());
+				data.putString("mode", _roster.getPresence(address).getMode().name());
+				msg.setData(data);
+				sendMessage(msg);
+			}
 		}
 
 		@Override
 		public void entriesUpdated(Collection<String> addresses) {
-
+			for (String address : addresses) {
+				Log.d(TAG, "roster entry updated: " + address);
+			}
 		}
 
 		@Override
 		public void entriesDeleted(Collection<String> addresses) {
+			for (String address : addresses) {
+				Log.d(TAG, "roster entry deleted: " + address);
 
+				Message msg = Message.obtain(null, MSG_FRIEND_REMOVED);
+				Bundle data = new Bundle();
+				data.putString("jid", address);
+				msg.setData(data);
+				sendMessage(msg);
+			}
 		}
 
 		@Override
 		public void presenceChanged(Presence presence) {
 			Log.i(TAG, "Presence changed: from=" + presence.getFrom() + " status=" + presence.getStatus() + " mode=" + presence.getMode());
-			Log.d(TAG, presence.toString());
+//			Log.d(TAG, presence.toString());
+
+			Message msg = Message.obtain(null, MSG_STATUS);
+			Bundle data = new Bundle();
+			data.putString("jid", getBareJid(presence.getFrom()));
+			data.putString("mode", presence.getMode().name());
+			msg.setData(data);
+			sendMessage(msg);
 		}
 	}
+
+	private class XmppConnectionListener implements ConnectionListener {
+		@Override
+		public void connected(XMPPConnection connection) {
+			Log.d(TAG, "connected");
+		}
+
+		@Override
+		public void authenticated(XMPPConnection connection, boolean resumed) {
+			sendMessage(MSG_CONNECTED);
+			Log.d(TAG, "authenticated");
+		}
+
+		@Override
+		public void connectionClosed() {
+			Log.d(TAG, "connectionClosed");
+		}
+
+		@Override
+		public void connectionClosedOnError(Exception e) {
+			Log.d(TAG, "connectionClosedOnError");
+		}
+
+		@Override
+		public void reconnectionSuccessful() {
+			Log.d(TAG, "reconnectionSuccessful");
+		}
+
+		@Override
+		public void reconnectingIn(int seconds) {
+			Log.d(TAG, "reconnectingIn " + seconds);
+		}
+
+		@Override
+		public void reconnectionFailed(Exception e) {
+			Log.d(TAG, "reconnectionFailed");
+		}
+	}
+
+
 
 	private void connect() {
 		try {
@@ -169,7 +241,6 @@ public class XmppThread {
 			sendMessage(MSG_CONNECT_FAIL);
 			return;
 		}
-		sendMessage(MSG_CONNECTED);
 	}
 
 	private void disconnect() {
@@ -177,14 +248,7 @@ public class XmppThread {
 	}
 
 	private void setPresence(String status, String modeString) {
-		Presence.Mode mode = null;
-		try {
-			mode = Presence.Mode.fromString(modeString);
-		} catch (Exception e) {
-			Log.e(TAG, "Invalid mode: " + modeString);
-//			e.printStackTrace();
-		}
-		setPresence(status, mode);
+		setPresence(status, getMode(modeString));
 	}
 
 	private void setPresence(String status, Presence.Mode mode) {
@@ -234,6 +298,23 @@ public class XmppThread {
 			e.printStackTrace();
 			return;
 		}
+	}
+
+	public static final Presence.Mode getMode(String presenceMode) {
+		try {
+			return Presence.Mode.fromString(presenceMode);
+		} catch (Exception e) {
+			Log.e(TAG, "Invalid mode: " + presenceMode);
+//			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static final String getBareJid(String jid) {
+		if (jid.contains("/")) {
+			return jid.split("\\/")[0];
+		}
+		return jid;
 	}
 
 //	public void stop() {

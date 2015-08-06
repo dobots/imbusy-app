@@ -33,6 +33,7 @@ public class ImBusyApp extends Application {
 	};
 
 	private Status _status;
+	private PhoneContactList _contactList = new PhoneContactList();
 
 	public static ImBusyApp getInstance() {
 		return _instance;
@@ -79,7 +80,14 @@ public class ImBusyApp extends Application {
 		Log.i(TAG, "---------------------------");
 		Log.i(TAG, "Outgoing call to " + number);
 		Log.i(TAG, "---------------------------");
-		startService(new Intent(this, StatusPopupService.class));
+		String fixedNumber = new String(number);
+		fixedNumber = fixedNumber.replaceAll(" ","");
+		fixedNumber = fixedNumber.replaceAll("\\+", "00");
+		if (_contactList.containsKey(fixedNumber) && _contactList.get(fixedNumber).getStatus() == Status.BUSY) {
+			Log.i(TAG, fixedNumber + " is busy! Show popup");
+			startService(new Intent(this, StatusPopupService.class));
+		}
+		else Log.d(TAG, fixedNumber + " is not a contact or is not busy");
 	}
 
 	/** Phone goes idle, remove the status popup
@@ -131,5 +139,9 @@ public class ImBusyApp extends Application {
 
 	public Status getStatus() {
 		return _status;
+	}
+
+	public PhoneContactList getContactList() {
+		return _contactList;
 	}
 }
