@@ -246,10 +246,6 @@ public class XmppService extends Service {
 	}
 
 	public static String getNumber(String jid) {
-		if (!jid.contains("@")) {
-			return null;
-		}
-		String[] split = jid.split("@");
-		return split[0];
+		return XmppThread.getUsername(jid);
 	}
 }

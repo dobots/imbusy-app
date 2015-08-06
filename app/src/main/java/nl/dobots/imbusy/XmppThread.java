@@ -317,6 +317,13 @@ public class XmppThread {
 		return jid;
 	}
 
+	public static final String getUsername(String jid) {
+		if (jid.contains("@")) {
+			return jid.split("@")[0];
+		}
+		return null;
+	}
+
 //	public void stop() {
 //		_xmppThread.quit();
 //	}
