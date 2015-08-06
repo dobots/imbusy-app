@@ -217,11 +217,13 @@ public class XmppThread {
 		@Override
 		public void connectionClosed() {
 			Log.d(TAG, "connectionClosed");
+			sendMessage(MSG_DISCONNECTED);
 		}
 
 		@Override
 		public void connectionClosedOnError(Exception e) {
 			Log.d(TAG, "connectionClosedOnError");
+			sendMessage(MSG_DISCONNECTED);
 		}
 
 		@Override
@@ -237,6 +239,7 @@ public class XmppThread {
 		@Override
 		public void reconnectionFailed(Exception e) {
 			Log.d(TAG, "reconnectionFailed");
+//			sendMessage(MSG_CONNECT_FAIL);
 		}
 	}
 
