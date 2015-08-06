@@ -22,18 +22,18 @@ public class XmppService extends Service {
 	private XmppThread _xmppThread = null;
 	private Handler _handler;
 
-	/** Target we give to the xmpp runnable to send messages to, handled by MessageHandler. */
+	/** Target we give to the xmpp thread to send messages to, handled by MessageHandler. */
 	private final Messenger _messengerIn = new Messenger(new MessageHandler());
 	private Messenger _messengerOut;
 
 
-	/** Handler of incoming messages from xmpp runnable */
+	/** Handler of incoming messages from xmpp thread */
 	private class MessageHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case XmppThread.MSG_REGISTER: {
-					Log.i(TAG, "Register xmpp runnable messenger");
+					Log.i(TAG, "Register xmpp thread messenger");
 					_messengerOut = msg.replyTo;
 					onXmppInitialized();
 					break;
@@ -136,7 +136,7 @@ public class XmppService extends Service {
 			return;
 		}
 
-		ImBusyApp.Status status = ImBusyApp.getInstance().getStatus();
+		Status status = ImBusyApp.getInstance().getStatus();
 		if (status == null) {
 			return;
 		}

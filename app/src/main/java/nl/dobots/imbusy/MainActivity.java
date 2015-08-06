@@ -92,7 +92,7 @@ public class MainActivity extends ActionBarActivity {
 		});
 	}
 
-	public void setStatus(ImBusyApp.Status status) {
+	public void setStatus(Status status) {
 		if (status == null) {
 			return;
 		}
