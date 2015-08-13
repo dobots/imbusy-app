@@ -34,7 +34,9 @@ public class XmppThread {
 	public static final int MSG_DISCONNECT = 11;
 	public static final int MSG_CONNECT_FAIL = 12;
 	public static final int MSG_CONNECTED = 13;
-	public static final int MSG_DISCONNECTED = 14;
+	public static final int MSG_AUTHENTICATED = 14;
+	public static final int	MSG_AUTHENTICATE_FAIL = 15;
+	public static final int MSG_DISCONNECTED = 16;
 
 	public static final int MSG_SET_STATUS = 20;
 	public static final int MSG_STATUS = 21;
@@ -46,9 +48,11 @@ public class XmppThread {
 	public static final int MSG_REMOVE_FRIEND = 34;
 	public static final int MSG_FRIEND_REMOVED = 35;
 
+	public static final int MSG_SET_CONFIG = 40;
 
 	HandlerThread _xmppThread;
 
+	private XMPPTCPConnectionConfiguration.Builder _configBuilder;
 	private XMPPTCPConnectionConfiguration _config;
 	private AbstractXMPPConnection _connection;
 	private Presence _presence;
@@ -70,7 +74,10 @@ public class XmppThread {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case MSG_CONNECT: {
-					connect();
+					String username = msg.getData().getString("username");
+					String password = msg.getData().getString("password");
+					connect(username, password);
+//					connect("0031617468590@dobots.customers.luna.net", "-4EVYEQU_nARIhA_fdC1");
 					break;
 				}
 				case MSG_DISCONNECT: {
@@ -79,8 +86,8 @@ public class XmppThread {
 				}
 				case MSG_SET_STATUS: {
 					String statusMsg = msg.getData().getString("status");
-					String statusMode = msg.getData().getString("mode");
-					setPresence(statusMsg, statusMode);
+					String presenceMode = msg.getData().getString("mode");
+					setPresence(statusMsg, getMode(presenceMode));
 					break;
 				}
 				case MSG_GET_FRIENDS: {
@@ -97,6 +104,14 @@ public class XmppThread {
 					String jid = msg.getData().getString("jid");
 					removeFriend(jid);
 					break;
+				}
+				case MSG_SET_CONFIG: {
+					String username = msg.getData().getString("username");
+					String password = msg.getData().getString("password");
+					if (username != null && password != null) {
+						_configBuilder.setUsernameAndPassword(username, password);
+					}
+					// We can add more config settings here
 				}
 				default: {
 					super.handleMessage(msg);
@@ -125,26 +140,13 @@ public class XmppThread {
 		sendMessage(msg);
 	}
 
-	XmppThread(XMPPTCPConnectionConfiguration config, Messenger messenger) {
+	XmppThread(XMPPTCPConnectionConfiguration.Builder configBuilder, Messenger messenger) {
 		_xmppThread = new HandlerThread(TAG);
 		_xmppThread.start();
 		_messageHandler = new MessageHandler(_xmppThread.getLooper());
 		_messengerIn = new Messenger(_messageHandler);
-		_config = config;
+		_configBuilder = configBuilder;
 		_messengerOut = messenger;
-
-		_connection = new XMPPTCPConnection(_config);
-		_presence = new Presence(Presence.Type.available);
-
-		_roster = Roster.getInstanceFor(_connection);
-		_roster.addRosterListener(new XmppRosterListener());
-		_roster.setRosterLoadedAtLogin(true);
-		// TODO: manual buddy acceptance
-		// a PacketListener should be registered that listens for Presence packets that have a type of Presence.Type.subscribe
-//		_roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
-		_roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
-
-		_connection.addConnectionListener(new XmppConnectionListener());
 
 		// Give our messenger to the other end
 		Message msg = Message.obtain(null, MSG_REGISTER);
@@ -206,12 +208,13 @@ public class XmppThread {
 		@Override
 		public void connected(XMPPConnection connection) {
 			Log.d(TAG, "connected");
+			sendMessage(MSG_CONNECTED);
 		}
 
 		@Override
 		public void authenticated(XMPPConnection connection, boolean resumed) {
-			sendMessage(MSG_CONNECTED);
 			Log.d(TAG, "authenticated");
+			sendMessage(MSG_AUTHENTICATED);
 		}
 
 		@Override
@@ -243,32 +246,74 @@ public class XmppThread {
 		}
 	}
 
-
-
 	private void connect() {
+		connect(null, null);
+	}
+
+	private void connect(String username, String password) {
+		Log.d(TAG, "connect " + username);
+
+		// First: clean up the old connection if it exists
+		if (_connection != null) {
+			_connection.disconnect();
+		}
+
+		if (username != null && password != null) {
+			_configBuilder.setUsernameAndPassword(username, password);
+		}
+
+		_config = _configBuilder.build();
+		_connection = new XMPPTCPConnection(_config);
+		_presence = new Presence(Presence.Type.available);
+
+		_roster = Roster.getInstanceFor(_connection);
+		_roster.addRosterListener(new XmppRosterListener());
+		_roster.setRosterLoadedAtLogin(true);
+		// TODO: manual buddy acceptance
+		// a PacketListener should be registered that listens for Presence packets that have a type of Presence.Type.subscribe
+//		_roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
+		_roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+
+		_connection.addConnectionListener(new XmppConnectionListener());
+
 		try {
 			_connection.connect();
-			_connection.login();
 		} catch (Exception e) {
 			Log.e(TAG, "Failed to connect");
 			e.printStackTrace();
 			sendMessage(MSG_CONNECT_FAIL);
+			disconnect();
 			return;
 		}
+
+		try {
+//			if (jid != null && password != null) {
+//				_connection.login(jid, password);
+//			}
+//			else {
+				_connection.login();
+//			}
+		} catch (Exception e) {
+			Log.e(TAG, "Failed to login");
+			e.printStackTrace();
+			sendMessage(MSG_AUTHENTICATE_FAIL);
+//			disconnect();
+			return;
+		}
+
 	}
 
 	private void disconnect() {
-		_connection.disconnect();
-	}
-
-	private void setPresence(String status, String modeString) {
-		setPresence(status, getMode(modeString));
+		if (_connection != null) {
+			_connection.disconnect();
+			_connection = null;
+		}
 	}
 
 	private void setPresence(String status, Presence.Mode mode) {
 //		Log.d(TAG, "setPresence " + status + " " + mode);
 
-		if (!_connection.isAuthenticated()) {
+		if (_connection == null || !_connection.isAuthenticated()) {
 			return;
 		}
 
@@ -357,7 +402,7 @@ public class XmppThread {
 		return null;
 	}
 
-//	public void stop() {
-//		_xmppThread.quit();
-//	}
+	public void stop() {
+		_xmppThread.quit();
+	}
 }

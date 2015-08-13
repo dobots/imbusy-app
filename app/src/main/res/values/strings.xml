@@ -1,16 +1,20 @@
 <resources>
 	<string name="app_name">ImBusy</string>
 
+	<string name="login_button">Login</string>
+	<string name="login_button_logged_in">Change login</string>
 	<string name="stop_button">Stop</string>
 	<string name="done">Done</string>
 
-	<string name="status_prefix">Status:</string>
+	<string name="status_prefix">My status:</string>
 	<string name="status_available">Available</string>
 	<string name="status_busy">Busy</string>
 
 	<string name="threshold_prefix">RSSI Threshold (dB):</string>
 
 	<string name="closest_device_prefix">Closest beacon:</string>
+
+	<string name="phone_nr_prompt">Enter your phone number:</string>
 
 	<string name="address_prefix">Address:</string>
 	<string name="rssi_prefix">RSSI:</string>
