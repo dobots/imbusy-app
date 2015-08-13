@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import org.jivesoftware.smack.packet.Presence;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import nl.dobots.bluenet.extended.BleExt;
 import nl.dobots.bluenet.extended.structs.BleDevice;
 import nl.dobots.bluenet.extended.structs.BleDeviceMap;
@@ -52,6 +55,7 @@ public class ImBusyApp extends Application {
 	private XmppService.XmppStatus _xmppStatus;
 //	private String _phoneNumber;
 	private PhoneContactList _contactList = new PhoneContactList();
+	private Set<ImBusyListener> _listenerList = new HashSet<>();
 
 	private XmppService _xmppService = null;
 	private ServiceConnection _xmppServiceConnection = new ServiceConnection() {
@@ -117,6 +121,20 @@ public class ImBusyApp extends Application {
 //		android.os.Process.killProcess(android.os.Process.myPid());
 	}
 
+	public void addListener(ImBusyListener listener) {
+		_listenerList.add(listener);
+	}
+
+	public void removeListener(ImBusyListener listener) {
+		_listenerList.remove(listener);
+	}
+
+	public void sendToListeners(Status status) {
+		for (ImBusyListener listener : _listenerList) {
+			listener.onStatus(status);
+		}
+	}
+
 	public void onOutgoingCall(String number) {
 		Log.i(TAG, "---------------------------");
 		Log.i(TAG, "Outgoing call to " + number);
@@ -171,8 +189,9 @@ public class ImBusyApp extends Application {
 
 	public void setStatus(Status status) {
 		Log.d(TAG, "Changed status to " + status);
-		_handler.removeCallbacks(_setAvailable);
 		_status = status;
+		sendToListeners(status);
+		_handler.removeCallbacks(_setAvailable);
 		_handler.postDelayed(_setAvailable, 10000); // TODO: magic nr
 	}
 
