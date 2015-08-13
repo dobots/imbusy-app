@@ -2,7 +2,9 @@ package nl.dobots.imbusy;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Bart van Vliet on 6-8-15.
@@ -26,5 +28,9 @@ public class PhoneContactList extends HashMap<String, PhoneContact> {
 
 	public void remove(PhoneContact contact) {
 		remove(contact.getNumber());
+	}
+
+	public List<PhoneContact> toList() {
+		return new ArrayList<PhoneContact>(values());
 	}
 }
