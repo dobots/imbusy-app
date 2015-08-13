@@ -123,19 +123,19 @@ public class XmppService extends Service {
 		_listenerList.remove(listener);
 	}
 
-	public void sendToListeners(XmppStatus status) {
+	private void sendToListeners(XmppStatus status) {
 		for (XmppServiceListener listener : _listenerList) {
 			listener.onConnectStatus(status);
 		}
 	}
 
-	public void sendToListeners(XmppError error) {
+	private void sendToListeners(XmppError error) {
 		for (XmppServiceListener listener : _listenerList) {
 			listener.onError(error);
 		}
 	}
 
-	public void sendToListeners(Presence presence) {
+	private void sendToListeners(Presence presence) {
 		for (XmppServiceListener listener : _listenerList) {
 			listener.onPresence(presence);
 		}
@@ -149,7 +149,7 @@ public class XmppService extends Service {
 		String number = preferences.getString(ImBusyApp.PREFERENCE_PHONE_NUMBER, null);
 		String password = preferences.getString(ImBusyApp.PREFERENCE_PASSWORD, null);
 
-
+		// TODO: are we sure that messages can't be seen by other apps?
 		Message msg = Message.obtain(null, XmppThread.MSG_CONNECT);
 		Bundle data = new Bundle();
 		data.putString("username", number);
@@ -157,6 +157,17 @@ public class XmppService extends Service {
 		msg.setData(data);
 		sendMessage(msg);
 	}
+
+	/** Adds a friend on XMPP, your friend will have to add you too, in order for it to have an effect */
+	public void xmppAddFriend(String username, String nick) {
+		Message msg = Message.obtain(null, XmppThread.MSG_ADD_FRIEND);
+		Bundle data = new Bundle();
+		data.putString("jid", username + "@" + XMPP_DOMAIN);
+		data.putString("nick", nick);
+		msg.setData(data);
+		sendMessage(msg);
+	}
+
 
 	private void onXmppInitialized() {
 		sendMessage(XmppThread.MSG_CONNECT);
