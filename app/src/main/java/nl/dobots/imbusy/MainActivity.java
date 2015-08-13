@@ -1,6 +1,5 @@
 package nl.dobots.imbusy;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,15 +7,13 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,12 +25,12 @@ import nl.dobots.bluenet.extended.structs.BleDevice;
 import nl.dobots.bluenet.extended.structs.BleDeviceMap;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 	private static final String TAG = MainActivity.class.getCanonicalName();
 	private static final int STATUS_POLL_DELAY = 500;
 	private Context _context;
 	private Handler _handler;
-	private Button _stopButton;
+//	private Button _stopButton;
 	private Button _loginButton;
 
 	private XmppService _xmppService = null;
@@ -105,12 +102,21 @@ public class MainActivity extends ActionBarActivity {
 
 		//noinspection SimplifiableIfStatement
 		switch(id) {
-			case R.id.device_settings: {
+			case R.id.menu_device_settings: {
 				startActivity(new Intent(this, DeviceSettingsActivity.class));
 				return true;
 			}
-			case R.id.device_selection: {
+			case R.id.menu_device_selection: {
 				startActivity(new Intent(this, DeviceSelectActivity.class));
+				return true;
+			}
+			case R.id.menu_show_contacts: {
+				startActivity(new Intent(this, ContactsActivity.class));
+				return true;
+			}
+			case R.id.menu_main_stop: {
+				finish();
+				ImBusyApp.getInstance().stop();
 				return true;
 			}
 		}
@@ -118,13 +124,13 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	private void initButtons(){
-		_stopButton = (Button) findViewById(R.id.stopButton);
-		_stopButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				finish();
-				ImBusyApp.getInstance().stop();
-			}
-		});
+//		_stopButton = (Button) findViewById(R.id.stopButton);
+//		_stopButton.setOnClickListener(new View.OnClickListener() {
+//			public void onClick(View v) {
+//				finish();
+//				ImBusyApp.getInstance().stop();
+//			}
+//		});
 		_loginButton = (Button) findViewById(R.id.loginButton);
 		_loginButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {

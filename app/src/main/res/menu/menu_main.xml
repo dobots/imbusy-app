@@ -1,8 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
-	<item android:id="@+id/device_settings" android:title="@string/device_settings"
+	<item android:id="@+id/menu_device_settings" android:title="@string/menu_device_settings"
 		android:orderInCategory="100" app:showAsAction="never" />
-	<item android:id="@+id/device_selection" android:title="@string/device_selection"
+	<item android:id="@+id/menu_device_selection" android:title="@string/menu_device_selection"
+		  android:orderInCategory="100" app:showAsAction="never" />
+	<item android:id="@+id/menu_show_contacts" android:title="@string/menu_show_contacts"
+		  android:orderInCategory="100" app:showAsAction="never" />
+	<item android:id="@+id/menu_main_stop" android:title="@string/stop_button"
 		  android:orderInCategory="100" app:showAsAction="never" />
 </menu>

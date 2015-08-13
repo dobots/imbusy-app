@@ -3,8 +3,9 @@
 
 	<string name="login_button">Login</string>
 	<string name="login_button_logged_in">Change login</string>
-	<string name="stop_button">Stop</string>
+	<string name="stop_button">Stop app</string>
 	<string name="done">Done</string>
+	<string name="add">Add</string>
 
 	<string name="status_prefix">My status:</string>
 	<string name="status_available">Available</string>
@@ -19,9 +20,15 @@
 	<string name="address_prefix">Address:</string>
 	<string name="rssi_prefix">RSSI:</string>
 
-	<string name="device_settings">Device settings</string>
+	<string name="menu_device_settings">Device settings</string>
 	<string name="title_activity_device_settings">Device settings</string>
 
-	<string name="device_selection">Device selection</string>
+	<string name="menu_device_selection">Device selection</string>
 	<string name="title_activity_device_select">Device selection</string>
+
+	<string name="menu_show_contacts">Contacts</string>
+	<string name="title_activity_contacts">Contacts</string>
+
+	<string name="hello_world">Hello world!</string>
+	<string name="action_settings">Settings</string>
 </resources>
