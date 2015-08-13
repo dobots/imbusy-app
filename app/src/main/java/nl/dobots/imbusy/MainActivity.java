@@ -55,7 +55,11 @@ public class MainActivity extends ActionBarActivity {
 			bindService(new Intent(this, XmppService.class), _xmppServiceConnection, Context.BIND_AUTO_CREATE);
 		}
 
-		updateStatus();
+//		if (ImBusyApp.getInstance() != null) {
+		setStatus(ImBusyApp.getInstance().getStatus());
+		ImBusyApp.getInstance().addListener(_imBusyListener);
+//		}
+
 		updateClosestDevice();
 
 		_handler = new Handler();
@@ -64,7 +68,6 @@ public class MainActivity extends ActionBarActivity {
 		_handler.post(new Runnable() {
 			@Override
 			public void run() {
-				updateStatus();
 				updateClosestDevice();
 				_handler.postDelayed(this, STATUS_POLL_DELAY);
 			}
@@ -81,6 +84,7 @@ public class MainActivity extends ActionBarActivity {
 			_xmppService.removeListener(_xmppListener);
 			unbindService(_xmppServiceConnection);
 		}
+		ImBusyApp.getInstance().addListener(_imBusyListener);
 		// Remove all callbacks and messages that were posted
 		_handler.removeCallbacksAndMessages(null);
 	}
@@ -146,12 +150,6 @@ public class MainActivity extends ActionBarActivity {
 		statusTextView.setText(text);
 	}
 
-	private void updateStatus() {
-		if (ImBusyApp.getInstance() != null) {
-			setStatus(ImBusyApp.getInstance().getStatus());
-		}
-	}
-
 	private void updateClosestDevice() {
 		final TextView closestDeviceTextView = (TextView) findViewById(R.id.closest_device);
 		String text = getResources().getString(R.string.closest_device_prefix);
@@ -171,6 +169,12 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 
+	private final ImBusyListener _imBusyListener = new ImBusyListener() {
+		@Override
+		public void onStatus(Status status) {
+			setStatus(status);
+		}
+	};
 
 	private final ServiceConnection _xmppServiceConnection = new ServiceConnection() {
 		@Override
