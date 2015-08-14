@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.jivesoftware.smack.packet.Presence;
 
@@ -178,8 +177,7 @@ public class ImBusyApp extends Application {
 		}
 
 		@Override
-		public void onPresence(Presence presence) {
-
+		public void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend) {
 		}
 	};
 
@@ -231,4 +229,42 @@ public class ImBusyApp extends Application {
 	}
 
 	//	public String getOwnNumber() { return _phoneNumber; }
+
+
+
+	/** Helper function to convert xmpp presence mode to status */
+	public static final Status getStatus(Presence.Mode mode) {
+		switch (mode) {
+			case away:
+				return nl.dobots.imbusy.Status.BUSY;
+			case xa:
+				return nl.dobots.imbusy.Status.BUSY;
+			case dnd:
+				return nl.dobots.imbusy.Status.BUSY;
+			case chat:
+			case available:
+			default:
+				return nl.dobots.imbusy.Status.AVAILABLE;
+		}
+	}
+
+	/** Helper function to convert status to xmpp presence mode */
+	public static final Presence.Mode getMode(Status status) {
+		switch (status) {
+			case BUSY:
+				return Presence.Mode.dnd;
+			case AVAILABLE:
+			default:
+				return Presence.Mode.available;
+		}
+	}
+
+	public static String getXmppUsername(String phoneNumber) {
+		return phoneNumber;
+	}
+
+	/** Helper function to get the phone number from a jid */
+	public static String getNumber(String jid) {
+		return XmppThread.getUsername(jid);
+	}
 }

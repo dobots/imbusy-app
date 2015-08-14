@@ -21,7 +21,9 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ContactsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -30,14 +32,21 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 
 	private ListView _contactListView;
 	private ContactListAdapter _contactListAdapter;
-	private PhoneContactList _contactList;
-	private List<PhoneContact> _contactListCopy;
+//	private PhoneContactList _contactList;
+//	private List<PhoneContact> _contactListCopy;
+	private XmppFriendList _friendList;
+	private List<XmppFriend> _friendListCopy;
+
 
 	private XmppService _xmppService = null;
 	private ServiceConnection _xmppServiceConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			_xmppService = ((XmppService.XmppBinder)service).getService();
+			_xmppService.addListener(_xmppListener);
+			_friendList = _xmppService.getFriendList();
+			_friendListCopy = _friendList.toList();
+			_contactListAdapter.notifyDataSetChanged();
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
@@ -49,8 +58,9 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_contacts);
-		_contactList = ImBusyApp.getInstance().getContactList();
-		_contactListCopy = _contactList.toList();
+//		_contactList = ImBusyApp.getInstance().getContactList();
+//		_contactListCopy = _contactList.toList();
+		_friendListCopy = new ArrayList<>(0);
 		bindService(new Intent(this, XmppService.class), _xmppServiceConnection, Context.BIND_AUTO_CREATE);
 
 		initListView();
@@ -62,6 +72,7 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 		super.onDestroy();
 		Log.d(TAG, "onDestroy");
 		if (_xmppService != null) {
+			_xmppService.removeListener(_xmppListener);
 			unbindService(_xmppServiceConnection);
 		}
 //		// Remove all callbacks and messages that were posted
@@ -72,8 +83,11 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 		_contactListView = (ListView) findViewById(R.id.contactListView);
 		_contactListAdapter = new ContactListAdapter();
 		Log.d(TAG, "contact list:");
-		for (PhoneContact contact : _contactListCopy) {
-			Log.d(TAG, contact.getNumber() + " " + contact.getName());
+//		for (PhoneContact contact : _contactListCopy) {
+//			Log.d(TAG, contact.getNumber() + " " + contact.getName());
+//		}
+		for (XmppFriend friend : _friendListCopy) {
+			Log.d(TAG, friend.getUsername() + " " + friend.getNick());
 		}
 		_contactListView.setAdapter(_contactListAdapter);
 		// Activate the Click even of the List items
@@ -109,7 +123,6 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 //		_contactList.add(new PhoneContact(phoneNumber, name));
 //		_contactListCopy = _contactList.toList();
 		_xmppService.xmppAddFriend(phoneNumber, name);
-		_contactListAdapter.notifyDataSetChanged();
 	}
 
 
@@ -150,8 +163,12 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		PhoneContact contact = _contactListCopy.get(position);
-		Log.d(TAG, "clicked item " + position + " " + contact.getNumber());
+//		PhoneContact contact = _contactListCopy.get(position);
+//		Log.d(TAG, "clicked item " + position + " " + contact.getNumber());
+//		_xmppService.xmppRemoveFriend(contact.getNumber());
+		XmppFriend friend = _friendListCopy.get(position);
+		Log.d(TAG, "clicked item " + position + " " + friend.getUsername());
+		_xmppService.xmppRemoveFriend(friend.getUsername());
 	}
 
 	private class ContactListAdapter extends BaseAdapter {
@@ -161,12 +178,14 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 
 		@Override
 		public int getCount() {
-			return _contactListCopy.size();
+//			return _contactListCopy.size();
+			return _friendListCopy.size();
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return _contactListCopy.get(position);
+//			return _contactListCopy.get(position);
+			return _friendListCopy.get(position);
 		}
 
 		@Override
@@ -183,23 +202,54 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 				convertView = layoutInflater.inflate(R.layout.contact_item, null);
 			}
 
-			final PhoneContact contact = (PhoneContact)getItem(position);
-			Log.d(TAG, "contact view:");
-			Log.d(TAG, contact.getNumber());
+//			final PhoneContact contact = (PhoneContact)getItem(position);
+			final XmppFriend friend = (XmppFriend)getItem(position);
 
-
-			if (contact != null) {
+//			if (contact != null) {
+			if (friend != null) {
 				TextView contactNameView = (TextView)convertView.findViewById(R.id.contactName);
 				TextView contactInfoView = (TextView)convertView.findViewById(R.id.contactInfo);
 
-				contactNameView.setText(contact.getName());
-				contactInfoView.setText(contact.getNumber());
+//				contactNameView.setText(contact.getName());
+//				contactInfoView.setText(contact.getNumber());
+				contactNameView.setText(friend.getNick());
+				contactInfoView.setText(friend.getUsername());
 			}
 
 			return convertView;
 		}
 	}
 
+
+	private final XmppServiceListener _xmppListener = new XmppServiceListener() {
+		@Override
+		public void onConnectStatus(XmppService.XmppStatus status) {
+		}
+
+		@Override
+		public void onError(XmppService.XmppError error) {
+		}
+
+		@Override
+		public void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend) {
+			switch (event) {
+				case ADDED:{
+					_friendListCopy = _friendList.toList();
+					_contactListAdapter.notifyDataSetChanged();
+				}
+				case REMOVED:{
+					_friendListCopy = _friendList.toList();
+					_contactListAdapter.notifyDataSetChanged();
+				}
+				case PRESENCE_UPDATE:{
+
+				}
+				case FRIEND_REQUEST:{
+
+				}
+			}
+		}
+	};
 
 //	@Override
 //	public boolean onCreateOptionsMenu(Menu menu) {

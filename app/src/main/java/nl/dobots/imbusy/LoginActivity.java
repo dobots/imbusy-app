@@ -223,7 +223,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 		public void onError(XmppService.XmppError error) {
 			switch (error) {
 				case CONNECT_FAILURE: {
-					Toast.makeText(_context, R.string.error_unable_to_connect, Toast.LENGTH_SHORT).show();
+					// Already done by main activity?
+//					Toast.makeText(_context, R.string.error_unable_to_connect, Toast.LENGTH_SHORT).show();
 					showProgress(false);
 					break;
 				}
@@ -235,9 +236,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 				}
 			}
 		}
-
 		@Override
-		public void onPresence(Presence presence) {}
+		public void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend) {
+		}
 	};
 
 	public void showProgress(boolean show) {

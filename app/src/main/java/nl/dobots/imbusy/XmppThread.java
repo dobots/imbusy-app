@@ -12,8 +12,10 @@ import android.util.Log;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.roster.RosterListener;
@@ -38,8 +40,8 @@ public class XmppThread {
 	public static final int	MSG_AUTHENTICATE_FAIL = 15;
 	public static final int MSG_DISCONNECTED = 16;
 
-	public static final int MSG_SET_STATUS = 20;
-	public static final int MSG_STATUS = 21;
+	public static final int MSG_SET_PRESENCE = 20;
+	public static final int MSG_PRESENCE_UPDATE = 21;
 
 	public static final int MSG_GET_FRIENDS = 30;
 	public static final int MSG_FRIENDS_LIST = 31;
@@ -47,6 +49,7 @@ public class XmppThread {
 	public static final int MSG_FRIEND_ADDED = 33;
 	public static final int MSG_REMOVE_FRIEND = 34;
 	public static final int MSG_FRIEND_REMOVED = 35;
+	public static final int MSG_FRIEND_REQUEST = 36;
 
 	public static final int MSG_SET_CONFIG = 40;
 
@@ -84,7 +87,7 @@ public class XmppThread {
 					disconnect();
 					break;
 				}
-				case MSG_SET_STATUS: {
+				case MSG_SET_PRESENCE: {
 					String statusMsg = msg.getData().getString("status");
 					String presenceMode = msg.getData().getString("mode");
 					setPresence(statusMsg, getMode(presenceMode));
@@ -195,7 +198,7 @@ public class XmppThread {
 			Log.i(TAG, "Presence changed: from=" + presence.getFrom() + " status=" + presence.getStatus() + " mode=" + presence.getMode());
 //			Log.d(TAG, presence.toString());
 
-			Message msg = Message.obtain(null, MSG_STATUS);
+			Message msg = Message.obtain(null, MSG_PRESENCE_UPDATE);
 			Bundle data = new Bundle();
 			data.putString("jid", getBareJid(presence.getFrom()));
 			data.putString("mode", presence.getMode().name());
@@ -203,6 +206,28 @@ public class XmppThread {
 			sendMessage(msg);
 		}
 	}
+
+	private StanzaListener _presenceListener = new StanzaListener() {
+		@Override
+		public void processPacket(Stanza packet) throws SmackException.NotConnectedException {
+			Presence presence = (Presence)packet;
+			Log.d(TAG, "Presence type: " + presence.getType());
+			switch (presence.getType()) {
+				case subscribe:{
+					Log.d(TAG, "Subscription from: " + presence.getFrom());
+
+					Message msg = Message.obtain(null, MSG_FRIEND_REQUEST);
+					Bundle data = new Bundle();
+					data.putString("jid", getBareJid(presence.getFrom()));
+					msg.setData(data);
+					sendMessage(msg);
+				}
+				case subscribed:{
+					Log.d(TAG, "Subscribed to: " + presence.getFrom());
+				}
+			}
+		}
+	};
 
 	private class XmppConnectionListener implements ConnectionListener {
 		@Override
@@ -357,14 +382,16 @@ public class XmppThread {
 		}
 		try {
 //			_roster.createEntry("name@host.com", "nick", null);
-			_roster.createEntry(jid, nick, null);
+			_roster.createEntry(jid, nick, null); // This will call roster listener first
 		} catch (Exception e) {
-			Log.e(TAG, "Failed to add entry to roster: " + jid);
+			Log.e(TAG, "Failed to add " + nick + " to roster: " + jid);
 			e.printStackTrace();
 			return;
 		}
+		Log.i(TAG, "Added " + nick + " to roster: " + jid);
 	}
 
+	/** Remove friend, also removes this friend's subscription to you */
 	private void removeFriend(String jid) {
 		if (jid == null) {
 			return;
@@ -376,6 +403,7 @@ public class XmppThread {
 			e.printStackTrace();
 			return;
 		}
+		Log.i(TAG, "Removed from roster: " + jid);
 	}
 
 	public static final Presence.Mode getMode(String presenceMode) {

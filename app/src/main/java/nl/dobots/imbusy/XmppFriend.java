@@ -6,8 +6,8 @@ import org.jivesoftware.smack.packet.Presence;
  * Created by Bart van Vliet on 6-8-15.
  */
 public class XmppFriend {
-	private String _number;
-	private String _host;
+	private String _username;
+	private String _domain;
 	private String _jid;
 	private String _nick;
 	private Presence.Mode _mode;
@@ -18,26 +18,26 @@ public class XmppFriend {
 		_mode = mode;
 	}
 
-	public XmppFriend(String number, String host, String nick, Presence.Mode mode) {
-		this(number + "@" + host, nick, mode);
+	public XmppFriend(String username, String domain, String nick, Presence.Mode mode) {
+		this(username + "@" + domain, nick, mode);
 	}
 
-	public String getNumber() {
-		return _number;
+	public String getUsername() {
+		return _username;
 	}
 
-	public void setNumber(String number) {
-		_number = number;
-		_jid = _number + "@" + _host;
+	public void setUsername(String username) {
+		_username = username;
+		_jid = _username + "@" + _domain;
 	}
 
-	public String getHost() {
-		return _host;
+	public String getDomain() {
+		return _domain;
 	}
 
-	public void setHost(String host) {
-		_host = host;
-		_jid = _number + "@" + _host;
+	public void setDomain(String domain) {
+		_domain = domain;
+		_jid = _username + "@" + _domain;
 	}
 
 	public String getJid() {
@@ -47,8 +47,8 @@ public class XmppFriend {
 	public void setJid(String jid) {
 		_jid = jid;
 		String[] split = jid.split("@");
-		_number = split[0];
-		_host = split[1];
+		_username = split[0];
+		_domain = split[1];
 	}
 
 	public String getNick() {

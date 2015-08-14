@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		@Override
-		public void onPresence(Presence presence) {
+		public void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend) {
 
 		}
 	};

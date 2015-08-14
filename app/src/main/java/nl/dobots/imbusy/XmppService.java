@@ -30,7 +30,7 @@ public class XmppService extends Service {
 	private static final int STATUS_POLL_DELAY = 500;
 	private XmppThread _xmppThread = null;
 	private Handler _handler;
-//	private XmppFriendList _friendList = new XmppFriendList();
+	private XmppFriendList _friendList = new XmppFriendList();
 
 	private Set<XmppServiceListener> _listenerList = new HashSet<>();
 	enum XmppStatus {
@@ -43,6 +43,13 @@ public class XmppService extends Service {
 	enum XmppError {
 		CONNECT_FAILURE,
 		AUTHORIZATION_FAILURE
+	}
+
+	enum XmppFriendEvent {
+		ADDED,
+		REMOVED,
+		PRESENCE_UPDATE,
+		FRIEND_REQUEST
 	}
 
 	/** Binder given to users that bind to this service */
@@ -69,7 +76,7 @@ public class XmppService extends Service {
 		XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
 		configBuilder.setUsernameAndPassword(number, password);
 		configBuilder.setServiceName(XMPP_DOMAIN);
-//		configBuilder.setHost(XMPP_HOST);
+		configBuilder.setHost(XMPP_HOST);
 		configBuilder.setPort(XMPP_PORT);
 		configBuilder.setDebuggerEnabled(true);
 
@@ -105,14 +112,14 @@ public class XmppService extends Service {
 
 		_handler = new Handler();
 
-		//TODO: not by polling, but by broadcast message?
-		_handler.post(new Runnable() {
-			@Override
-			public void run() {
-				updateOwnStatus();
-				_handler.postDelayed(this, STATUS_POLL_DELAY);
-			}
-		});
+//		//TODO: not by polling, but by broadcast message?
+//		_handler.post(new Runnable() {
+//			@Override
+//			public void run() {
+//				updateOwnStatus();
+//				_handler.postDelayed(this, STATUS_POLL_DELAY);
+//			}
+//		});
 	}
 
 	public void addListener(XmppServiceListener listener) {
@@ -135,9 +142,9 @@ public class XmppService extends Service {
 		}
 	}
 
-	private void sendToListeners(Presence presence) {
+	private void sendToListeners(XmppFriendEvent event, XmppFriend friend) {
 		for (XmppServiceListener listener : _listenerList) {
-			listener.onPresence(presence);
+			listener.onFriend(event, friend);
 		}
 	}
 
@@ -164,6 +171,15 @@ public class XmppService extends Service {
 		Bundle data = new Bundle();
 		data.putString("jid", username + "@" + XMPP_DOMAIN);
 		data.putString("nick", nick);
+		msg.setData(data);
+		sendMessage(msg);
+	}
+
+	/** Removes a friend on XMPP, also denies this friend's subscription to you */
+	public void xmppRemoveFriend(String username) {
+		Message msg = Message.obtain(null, XmppThread.MSG_REMOVE_FRIEND);
+		Bundle data = new Bundle();
+		data.putString("jid", username + "@" + XMPP_DOMAIN);
 		msg.setData(data);
 		sendMessage(msg);
 	}
@@ -201,22 +217,37 @@ public class XmppService extends Service {
 			return;
 		}
 
-//		Presence.Mode mode = XmppThread.getMode(presenceMode);
-//		_friendList.add(new XmppFriend(jid, nick, mode));
+		Presence.Mode mode = XmppThread.getMode(presenceMode);
+		XmppFriend friend = new XmppFriend(jid, nick, mode);
+		_friendList.add(friend);
 
-		String number = getNumber(jid);
-		Status status = getStatus(XmppThread.getMode(presenceMode));
-		ImBusyApp.getInstance().getContactList().add(new PhoneContact(number, nick, status));
+		sendToListeners(XmppFriendEvent.ADDED, friend);
+
+//		String number = getNumber(jid);
+//		Status status = getStatus(XmppThread.getMode(presenceMode));
+//		ImBusyApp.getInstance().getContactList().add(new PhoneContact(number, nick, status));
 	}
 
 	private void onXmppFriendRemoved(String jid) {
 		if (jid == null) {
 			return;
 		}
-//		_friendList.remove(jid);
+		XmppFriend friend = _friendList.get(jid);
+		if (friend != null) {
+			_friendList.remove(jid);
+			sendToListeners(XmppFriendEvent.REMOVED, friend);
+		}
 
-		String number = getNumber(jid);
-		ImBusyApp.getInstance().getContactList().remove(number);
+//		String number = getNumber(jid);
+//		ImBusyApp.getInstance().getContactList().remove(number);
+	}
+
+	private void onXmppFriendRequest(String jid) {
+		if (jid == null) {
+			return;
+		}
+		XmppFriend friend = new XmppFriend(jid, null, null);
+		sendToListeners(XmppFriendEvent.FRIEND_REQUEST, friend);
 	}
 
 	private void onXmppFriendStatusUpdate(String jid, String presenceMode) {
@@ -224,33 +255,54 @@ public class XmppService extends Service {
 //			_friendList.get(jid).setMode(XmppThread.getMode(presenceMode));
 //			Log.d(TAG, "Update mode to " + presenceMode);
 //		}
-
-		Presence.Mode mode = XmppThread.getMode(presenceMode);
-		PhoneContactList contacts = ImBusyApp.getInstance().getContactList();
-		String number = getNumber(jid);
-		if (contacts.containsKey(number)) {
-			contacts.get(number).setStatus(getStatus(mode));
-			Log.d(TAG, "Update status to " + getStatus(mode));
+		XmppFriend friend = _friendList.get(jid);
+		if (friend != null) {
+			Presence.Mode mode = XmppThread.getMode(presenceMode);
+			friend.setMode(mode);
+			sendToListeners(XmppFriendEvent.PRESENCE_UPDATE, friend);
 		}
+
+
+//		PhoneContactList contacts = ImBusyApp.getInstance().getContactList();
+//		String number = getNumber(jid);
+//		if (contacts.containsKey(number)) {
+//			contacts.get(number).setStatus(getStatus(mode));
+//			Log.d(TAG, "Update status to " + getStatus(mode));
+//		}
 	}
 
-	private void updateOwnStatus() {
-		if (ImBusyApp.getInstance() == null) {
-			return;
-		}
-
-		Status status = ImBusyApp.getInstance().getStatus();
-		if (status == null) {
-			return;
-		}
-		String xmppModeText = getMode(status).name();
-		Message msg = Message.obtain(null, XmppThread.MSG_SET_STATUS);
+	public void setPresence(Presence presence) {
+		Message msg = Message.obtain(null, XmppThread.MSG_SET_PRESENCE);
 		Bundle data = new Bundle();
-//		data.putString("status", "");
-		data.putString("mode", xmppModeText);
+		String modeString = presence.getMode().name();
+		data.putString("mode", modeString);
+		String status = presence.getStatus();
+		data.putString("status", status);
 		msg.setData(data);
 		sendMessage(msg);
 	}
+
+	public XmppFriendList getFriendList() {
+		return _friendList;
+	}
+
+	//	private void updateOwnStatus() {
+//		if (ImBusyApp.getInstance() == null) {
+//			return;
+//		}
+//
+//		Status status = ImBusyApp.getInstance().getStatus();
+//		if (status == null) {
+//			return;
+//		}
+//		String xmppModeText = getMode(status).name();
+//		Message msg = Message.obtain(null, XmppThread.MSG_SET_PRESENCE);
+//		Bundle data = new Bundle();
+////		data.putString("status", "");
+//		data.putString("mode", xmppModeText);
+//		msg.setData(data);
+//		sendMessage(msg);
+//	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -331,7 +383,12 @@ public class XmppService extends Service {
 					onXmppFriendRemoved(jid);
 					break;
 				}
-				case XmppThread.MSG_STATUS: {
+				case XmppThread.MSG_FRIEND_REQUEST: {
+					String jid = msg.getData().getString("jid");
+					onXmppFriendRequest(jid);
+					break;
+				}
+				case XmppThread.MSG_PRESENCE_UPDATE: {
 					String jid = msg.getData().getString("jid");
 					String mode = msg.getData().getString("mode");
 					onXmppFriendStatusUpdate(jid, mode);
@@ -342,39 +399,5 @@ public class XmppService extends Service {
 				}
 			}
 		}
-	}
-
-
-
-
-	/** Helper function to convert xmpp presence mode to status */
-	public static final Status getStatus(Presence.Mode mode) {
-		switch (mode) {
-			case away:
-				return nl.dobots.imbusy.Status.BUSY;
-			case xa:
-				return nl.dobots.imbusy.Status.BUSY;
-			case dnd:
-				return nl.dobots.imbusy.Status.BUSY;
-			case chat:
-			case available:
-			default:
-				return nl.dobots.imbusy.Status.AVAILABLE;
-		}
-	}
-
-	/** Helper function to convert status to xmpp presence mode */
-	public static final Presence.Mode getMode(Status status) {
-		switch (status) {
-			case BUSY:
-				return Presence.Mode.dnd;
-			case AVAILABLE:
-			default:
-				return Presence.Mode.available;
-		}
-	}
-
-	public static String getNumber(String jid) {
-		return XmppThread.getUsername(jid);
 	}
 }

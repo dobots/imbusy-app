@@ -8,6 +8,6 @@ import org.jivesoftware.smack.packet.Presence;
 public interface XmppServiceListener {
 	void onConnectStatus(XmppService.XmppStatus status);
 	void onError(XmppService.XmppError error);
-	void onPresence(Presence presence);
+	void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend);
 	// Etc..
 }
