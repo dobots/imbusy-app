@@ -6,8 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import org.jivesoftware.smack.packet.Presence;
@@ -112,6 +115,7 @@ public class ImBusyApp extends Application {
 		if (_xmppService != null) {
 			_xmppService.removeListener(_xmppListener);
 			unbindService(_xmppServiceConnection);
+			_xmppService = null;
 		}
 //		_xmppService = null;
 
@@ -178,6 +182,15 @@ public class ImBusyApp extends Application {
 
 		@Override
 		public void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend) {
+			switch (event) {
+				case ADDED:{
+					if (friend.getNick() == null) {
+						String name = getContactName(getNumber(friend.getJid()));
+						friend.setNick(name);
+					}
+					break;
+				}
+			}
 		}
 	};
 
@@ -266,5 +279,20 @@ public class ImBusyApp extends Application {
 	/** Helper function to get the phone number from a jid */
 	public static String getNumber(String jid) {
 		return XmppThread.getUsername(jid);
+	}
+
+	/** Retrieves the name as stored in the phones address book, given a phone number */
+	public String getContactName(String phoneNumber) {
+		String[] projection = new String[] { ContactsContract.PhoneLookup.DISPLAY_NAME, ContactsContract.PhoneLookup._ID };
+		Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+		Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+		String contactName = "";
+		if (cursor != null) {
+			if (cursor.moveToFirst()) {
+				contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+			}
+			cursor.close();
+		}
+		return contactName;
 	}
 }

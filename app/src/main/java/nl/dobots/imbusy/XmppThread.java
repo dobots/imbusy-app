@@ -14,15 +14,18 @@ import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.roster.RosterListener;
+import org.jivesoftware.smack.roster.packet.RosterPacket;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 
 import java.util.Collection;
+import java.util.Locale;
 
 /**
  * Created by Bart van Vliet on 5-8-15.
@@ -41,7 +44,7 @@ public class XmppThread {
 	public static final int MSG_DISCONNECTED = 16;
 
 	public static final int MSG_SET_PRESENCE = 20;
-	public static final int MSG_PRESENCE_UPDATE = 21;
+	public static final int MSG_FRIEND_UPDATE = 21;
 
 	public static final int MSG_GET_FRIENDS = 30;
 	public static final int MSG_FRIENDS_LIST = 31;
@@ -50,6 +53,7 @@ public class XmppThread {
 	public static final int MSG_REMOVE_FRIEND = 34;
 	public static final int MSG_FRIEND_REMOVED = 35;
 	public static final int MSG_FRIEND_REQUEST = 36;
+	public static final int MSG_FRIEND_REQUEST_RESPONSE = 36;
 
 	public static final int MSG_SET_CONFIG = 40;
 
@@ -80,7 +84,6 @@ public class XmppThread {
 					String username = msg.getData().getString("username");
 					String password = msg.getData().getString("password");
 					connect(username, password);
-//					connect("0031617468590@dobots.customers.luna.net", "-4EVYEQU_nARIhA_fdC1");
 					break;
 				}
 				case MSG_DISCONNECT: {
@@ -108,6 +111,12 @@ public class XmppThread {
 					removeFriend(jid);
 					break;
 				}
+				case MSG_FRIEND_REQUEST_RESPONSE: {
+					String jid = msg.getData().getString("jid");
+					boolean accept = msg.getData().getBoolean("accept");
+					answerFriendRequest(jid, accept);
+					break;
+				}
 				case MSG_SET_CONFIG: {
 					String username = msg.getData().getString("username");
 					String password = msg.getData().getString("password");
@@ -115,6 +124,7 @@ public class XmppThread {
 						_configBuilder.setUsernameAndPassword(username, password);
 					}
 					// We can add more config settings here
+					break;
 				}
 				default: {
 					super.handleMessage(msg);
@@ -161,13 +171,14 @@ public class XmppThread {
 		@Override
 		public void entriesAdded(Collection<String> addresses) {
 			for (String address : addresses) {
-				Log.d(TAG, "roster entry added: " + address);
+				Log.d(TAG, "roster entry added: " + address + " status=" + _roster.getPresence(address).getStatus() + " mode=" + _roster.getPresence(address).getMode() + " type=" + _roster.getEntry(address).getType());
 
 				Message msg = Message.obtain(null, MSG_FRIEND_ADDED);
 				Bundle data = new Bundle();
 				data.putString("jid", address);
 				data.putString("nick", _roster.getEntry(address).getName());
 				data.putString("mode", _roster.getPresence(address).getMode().name());
+				data.putString("subscriptionType", _roster.getEntry(address).getType().name());
 				msg.setData(data);
 				sendMessage(msg);
 			}
@@ -176,7 +187,16 @@ public class XmppThread {
 		@Override
 		public void entriesUpdated(Collection<String> addresses) {
 			for (String address : addresses) {
-				Log.d(TAG, "roster entry updated: " + address);
+				Log.d(TAG, "roster entry updated: " + address + " type=" + _roster.getEntry(address).getType());
+
+				Message msg = Message.obtain(null, MSG_FRIEND_UPDATE);
+				Bundle data = new Bundle();
+				data.putString("jid", address);
+//				data.putString("nick", _roster.getEntry(address).getName());
+//				data.putString("mode", _roster.getPresence(address).getMode().name());
+				data.putString("subscriptionType", _roster.getEntry(address).getType().name());
+				msg.setData(data);
+				sendMessage(msg);
 			}
 		}
 
@@ -198,7 +218,7 @@ public class XmppThread {
 			Log.i(TAG, "Presence changed: from=" + presence.getFrom() + " status=" + presence.getStatus() + " mode=" + presence.getMode());
 //			Log.d(TAG, presence.toString());
 
-			Message msg = Message.obtain(null, MSG_PRESENCE_UPDATE);
+			Message msg = Message.obtain(null, MSG_FRIEND_UPDATE);
 			Bundle data = new Bundle();
 			data.putString("jid", getBareJid(presence.getFrom()));
 			data.putString("mode", presence.getMode().name());
@@ -215,15 +235,24 @@ public class XmppThread {
 			switch (presence.getType()) {
 				case subscribe:{
 					Log.d(TAG, "Subscription from: " + presence.getFrom());
-
 					Message msg = Message.obtain(null, MSG_FRIEND_REQUEST);
 					Bundle data = new Bundle();
 					data.putString("jid", getBareJid(presence.getFrom()));
 					msg.setData(data);
 					sendMessage(msg);
+					break;
 				}
 				case subscribed:{
 					Log.d(TAG, "Subscribed to: " + presence.getFrom());
+					break;
+				}
+				case unsubscribe:{
+					Log.d(TAG, presence.getFrom() + " unsubscribes from us");
+					break;
+				}
+				case unsubscribed:{
+					Log.d(TAG, "Unsubscribed from: " + presence.getFrom());
+					break;
 				}
 			}
 		}
@@ -296,10 +325,12 @@ public class XmppThread {
 		_roster.setRosterLoadedAtLogin(true);
 		// TODO: manual buddy acceptance
 		// a PacketListener should be registered that listens for Presence packets that have a type of Presence.Type.subscribe
-//		_roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
-		_roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+		_roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
+//		_roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
 
 		_connection.addConnectionListener(new XmppConnectionListener());
+//		_connection.addAsyncStanzaListener(_presenceListener, new StanzaTypeFilter(Presence.class));
+		_connection.addSyncStanzaListener(_presenceListener, new StanzaTypeFilter(Presence.class));
 
 		try {
 			_connection.connect();
@@ -406,6 +437,29 @@ public class XmppThread {
 		Log.i(TAG, "Removed from roster: " + jid);
 	}
 
+	private void answerFriendRequest(String jid, boolean accept) {
+		if (jid == null) {
+			return;
+		}
+		Presence response;
+		if (accept) {
+			response = new Presence(Presence.Type.subscribed);
+// 			response = new Presence(Presence.Type.subscribe);
+		}
+		else {
+			response = new Presence(Presence.Type.unsubscribed);
+		}
+
+		response.setTo(jid);
+		response.setFrom(_config.getUsername().toString());
+		try {
+			_connection.sendStanza(response);
+		} catch (SmackException.NotConnectedException e) {
+			Log.e(TAG, "Not connected");
+			e.printStackTrace();
+		}
+	}
+
 	public static final Presence.Mode getMode(String presenceMode) {
 		try {
 			return Presence.Mode.fromString(presenceMode);
@@ -414,6 +468,10 @@ public class XmppThread {
 //			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public static final RosterPacket.ItemType getSubscriptionType(String type) {
+		return RosterPacket.ItemType.valueOf(type.toLowerCase(Locale.US));
 	}
 
 	public static final String getBareJid(String jid) {
@@ -429,6 +487,7 @@ public class XmppThread {
 		}
 		return null;
 	}
+
 
 	public void stop() {
 		_xmppThread.quit();

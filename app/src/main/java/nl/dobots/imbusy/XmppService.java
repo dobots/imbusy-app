@@ -13,6 +13,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.roster.packet.RosterPacket;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.util.TLSUtils;
 
@@ -48,7 +49,7 @@ public class XmppService extends Service {
 	enum XmppFriendEvent {
 		ADDED,
 		REMOVED,
-		PRESENCE_UPDATE,
+		FRIEND_UPDATE,
 		FRIEND_REQUEST
 	}
 
@@ -184,6 +185,16 @@ public class XmppService extends Service {
 		sendMessage(msg);
 	}
 
+	/** Answers a friend request, either accept or reject, else it will be asked again later (on login) */
+	public void xmppAnswerFriendRequest(String username, boolean accept) {
+		Message msg = Message.obtain(null, XmppThread.MSG_FRIEND_REQUEST_RESPONSE);
+		Bundle data = new Bundle();
+		data.putString("jid", username + "@" + XMPP_DOMAIN);
+		data.putBoolean("accept", accept);
+		msg.setData(data);
+		sendMessage(msg);
+	}
+
 
 	private void onXmppInitialized() {
 		sendMessage(XmppThread.MSG_CONNECT);
@@ -211,14 +222,15 @@ public class XmppService extends Service {
 		sendToListeners(XmppStatus.DISCONNECTED);
 	}
 
-	private void onXmppFriendAdded(String jid, String nick, String presenceMode) {
-//		if (jid == null | nick == null | presenceMode == null) {
-		if (jid == null | presenceMode == null) {
+	private void onXmppFriendAdded(String jid, String nick, String presenceMode, String subscriptionType) {
+//		if (jid == null || nick == null || presenceMode == null) {
+		if (jid == null || presenceMode == null || subscriptionType == null) {
 			return;
 		}
 
 		Presence.Mode mode = XmppThread.getMode(presenceMode);
-		XmppFriend friend = new XmppFriend(jid, nick, mode);
+		RosterPacket.ItemType itemType = XmppThread.getSubscriptionType(subscriptionType);
+		XmppFriend friend = new XmppFriend(jid, nick, mode, itemType);
 		_friendList.add(friend);
 
 		sendToListeners(XmppFriendEvent.ADDED, friend);
@@ -246,20 +258,33 @@ public class XmppService extends Service {
 		if (jid == null) {
 			return;
 		}
-		XmppFriend friend = new XmppFriend(jid, null, null);
+		XmppFriend friend = new XmppFriend(jid, null, null, null);
 		sendToListeners(XmppFriendEvent.FRIEND_REQUEST, friend);
 	}
 
-	private void onXmppFriendStatusUpdate(String jid, String presenceMode) {
-//		if (_friendList.containsKey(jid)) {
-//			_friendList.get(jid).setMode(XmppThread.getMode(presenceMode));
-//			Log.d(TAG, "Update mode to " + presenceMode);
-//		}
+	private void onXmppFriendUpdate(String jid, String presenceMode, String subscriptionTypeString) {
 		XmppFriend friend = _friendList.get(jid);
 		if (friend != null) {
-			Presence.Mode mode = XmppThread.getMode(presenceMode);
-			friend.setMode(mode);
-			sendToListeners(XmppFriendEvent.PRESENCE_UPDATE, friend);
+			boolean updated = false;
+			if (presenceMode != null) {
+				Presence.Mode mode = XmppThread.getMode(presenceMode);
+				if (!friend.getMode().equals(mode)) {
+					updated = true;
+					friend.setMode(mode);
+				}
+			}
+
+			if (subscriptionTypeString != null) {
+				RosterPacket.ItemType subscriptionType = XmppThread.getSubscriptionType(subscriptionTypeString);
+				if (!friend.getSubscriptionType().equals(subscriptionType)) {
+					updated = true;
+					friend.setSubscriptionType(subscriptionType);
+				}
+			}
+
+			if (updated) {
+				sendToListeners(XmppFriendEvent.FRIEND_UPDATE, friend);
+			}
 		}
 
 
@@ -375,7 +400,8 @@ public class XmppService extends Service {
 					String jid = msg.getData().getString("jid");
 					String nick = msg.getData().getString("nick");
 					String mode = msg.getData().getString("mode");
-					onXmppFriendAdded(jid, nick, mode);
+					String subscriptionType = msg.getData().getString("subscriptionType");
+					onXmppFriendAdded(jid, nick, mode, subscriptionType);
 					break;
 				}
 				case XmppThread.MSG_FRIEND_REMOVED: {
@@ -388,10 +414,11 @@ public class XmppService extends Service {
 					onXmppFriendRequest(jid);
 					break;
 				}
-				case XmppThread.MSG_PRESENCE_UPDATE: {
+				case XmppThread.MSG_FRIEND_UPDATE: {
 					String jid = msg.getData().getString("jid");
 					String mode = msg.getData().getString("mode");
-					onXmppFriendStatusUpdate(jid, mode);
+					String subscriptionType = msg.getData().getString("subscriptionType");
+					onXmppFriendUpdate(jid, mode, subscriptionType);
 					break;
 				}
 				default: {

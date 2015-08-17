@@ -22,7 +22,7 @@ public class XmppFriendList extends HashMap<String, XmppFriend> {
 			Log.e(TAG, "Key is null");
 			return null;
 		}
-		Log.d(TAG, "Added: " + value.getJid() + " " + value.getNumber() + " " + value.getDomain() + " (" + value.getNick() + ") " + value.getMode());
+		Log.d(TAG, "Added: " + value.getJid() + " " + value.getUsername() + " " + value.getDomain() + " (" + value.getNick() + ") " + value.getMode());
 		return super.put(key, value);
 	}
 

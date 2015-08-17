@@ -8,7 +8,9 @@
 		android:id="@+id/doneButton"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:text="@string/done"/>
+		android:text="@string/done"
+		android:background="@drawable/buttonshape"
+		android:textColor="#FFFFFF"/>
 	<ListView
 		android:id="@+id/contactListView"
 		android:layout_width="fill_parent"
@@ -21,6 +23,8 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="@string/add"
-		android:layout_alignParentBottom="true"/>
+		android:layout_alignParentBottom="true"
+		android:background="@drawable/buttonshape"
+		android:textColor="#FFFFFF"/>
 
 </RelativeLayout>

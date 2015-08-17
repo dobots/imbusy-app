@@ -1,6 +1,7 @@
 package nl.dobots.imbusy;
 
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.roster.packet.RosterPacket;
 
 /**
  * Created by Bart van Vliet on 6-8-15.
@@ -11,15 +12,17 @@ public class XmppFriend {
 	private String _jid;
 	private String _nick;
 	private Presence.Mode _mode;
+	private RosterPacket.ItemType _subscriptionType;
 
-	public XmppFriend(String jid, String nick, Presence.Mode mode) {
+	public XmppFriend(String jid, String nick, Presence.Mode mode, RosterPacket.ItemType subscriptionType) {
 		setJid(jid);
 		_nick = nick;
 		_mode = mode;
+		_subscriptionType = subscriptionType;
 	}
 
-	public XmppFriend(String username, String domain, String nick, Presence.Mode mode) {
-		this(username + "@" + domain, nick, mode);
+	public XmppFriend(String username, String domain, String nick, Presence.Mode mode, RosterPacket.ItemType subscriptionType) {
+		this(username + "@" + domain, nick, mode, subscriptionType);
 	}
 
 	public String getUsername() {
@@ -65,5 +68,13 @@ public class XmppFriend {
 
 	public void setMode(Presence.Mode mode) {
 		_mode = mode;
+	}
+
+	public RosterPacket.ItemType getSubscriptionType() {
+		return _subscriptionType;
+	}
+
+	public void setSubscriptionType(RosterPacket.ItemType subscriptionType) {
+		_subscriptionType = subscriptionType;
 	}
 }

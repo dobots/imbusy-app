@@ -1,13 +1,19 @@
 package nl.dobots.imbusy;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -16,8 +22,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.jivesoftware.smack.packet.Presence;
 
 import java.util.ArrayList;
 
@@ -220,8 +224,42 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		@Override
-		public void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend) {
-
+		public void onFriend(XmppService.XmppFriendEvent event, final XmppFriend friend) {
+			switch (event) {
+				case ADDED:{
+					break;
+				}
+				case REMOVED:{
+					break;
+				}
+				case FRIEND_UPDATE:{
+					break;
+				}
+				case FRIEND_REQUEST:{
+					String number = friend.getUsername();
+					String name = ImBusyApp.getInstance().getContactName(number);
+					AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(_context);
+					dialogBuilder.setTitle("Friend request");
+					dialogBuilder.setMessage(name + " (" + number + ") wants to see your status.");
+					dialogBuilder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Log.d(TAG, "Accept friend request here");
+							_xmppService.xmppAnswerFriendRequest(friend.getUsername(), true);
+						}
+					});
+					dialogBuilder.setNegativeButton("Deny", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Log.d(TAG, "Deny friend request here");
+							_xmppService.xmppAnswerFriendRequest(friend.getUsername(), false);
+						}
+					});
+//					dialogBuilder.setIcon();
+					Dialog dialog = dialogBuilder.show();
+					break;
+				}
+			}
 		}
 	};
 }

@@ -1,8 +1,7 @@
 package nl.dobots.imbusy;
 
-import android.app.Activity;
-import android.app.LoaderManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -21,7 +20,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,17 +124,16 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 	}
 
 
-
-
-	//TODO: Uses deprecated function
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 		if (requestCode == PICK_CONTACT) {
 			if (resultCode == RESULT_OK) {
 				Uri uri = intent.getData();
-				Cursor cursor =  managedQuery(uri, null, null, null, null);
-				if (!cursor.moveToFirst()) {
+				ContentResolver contentResolver = getContentResolver();
+				Cursor cursor = contentResolver.query(uri, null, null, null, null);
+//				Cursor cursor =  managedQuery(uri, null, null, null, null); // Deprecated
+				if (cursor == null || !cursor.moveToFirst()) {
 					return;
 				}
 				String id = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID));
@@ -213,7 +210,22 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 //				contactNameView.setText(contact.getName());
 //				contactInfoView.setText(contact.getNumber());
 				contactNameView.setText(friend.getNick());
-				contactInfoView.setText(friend.getUsername());
+
+				String infoText = "";
+				switch (friend.getSubscriptionType()) {
+					case from:
+						infoText = "This person can see your status.\nAdd to see their status.";
+						break;
+					case none:
+					case remove:
+						infoText = "You are not (yet) allowed to see this persons status.\nRemove and add to re-request permission.";
+						break;
+					case both:
+					case to:
+						infoText = ImBusyApp.getStatus(friend.getMode()).name();
+						break;
+				}
+				contactInfoView.setText(friend.getUsername() + "\n" + infoText);
 			}
 
 			return convertView;
@@ -236,16 +248,20 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 				case ADDED:{
 					_friendListCopy = _friendList.toList();
 					_contactListAdapter.notifyDataSetChanged();
+					break;
 				}
 				case REMOVED:{
 					_friendListCopy = _friendList.toList();
 					_contactListAdapter.notifyDataSetChanged();
+					break;
 				}
-				case PRESENCE_UPDATE:{
-
+				case FRIEND_UPDATE:{
+					_friendListCopy = _friendList.toList();
+					_contactListAdapter.notifyDataSetChanged();
+					break;
 				}
 				case FRIEND_REQUEST:{
-
+					break;
 				}
 			}
 		}
