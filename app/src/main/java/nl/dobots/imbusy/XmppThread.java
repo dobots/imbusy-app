@@ -323,7 +323,7 @@ public class XmppThread {
 		_roster = Roster.getInstanceFor(_connection);
 		_roster.addRosterListener(new XmppRosterListener());
 		_roster.setRosterLoadedAtLogin(true);
-		// TODO: manual buddy acceptance
+
 		// a PacketListener should be registered that listens for Presence packets that have a type of Presence.Type.subscribe
 		_roster.setSubscriptionMode(Roster.SubscriptionMode.manual);
 //		_roster.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
