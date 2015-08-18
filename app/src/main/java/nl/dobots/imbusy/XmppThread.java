@@ -11,6 +11,7 @@ import android.util.Log;
 
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionListener;
+import org.jivesoftware.smack.ReconnectionManager;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
@@ -64,6 +65,7 @@ public class XmppThread {
 	private AbstractXMPPConnection _connection;
 	private Presence _presence;
 	private Roster _roster;
+	private ReconnectionManager _reconnectionManager;
 
 	/** Target we give to send messages to, handled by MessageHandler */
 	private Messenger _messengerIn;
@@ -331,6 +333,9 @@ public class XmppThread {
 		_connection.addConnectionListener(new XmppConnectionListener());
 //		_connection.addAsyncStanzaListener(_presenceListener, new StanzaTypeFilter(Presence.class));
 		_connection.addSyncStanzaListener(_presenceListener, new StanzaTypeFilter(Presence.class));
+
+		_reconnectionManager = ReconnectionManager.getInstanceFor(_connection);
+		_reconnectionManager.enableAutomaticReconnection();
 
 		try {
 			_connection.connect();
