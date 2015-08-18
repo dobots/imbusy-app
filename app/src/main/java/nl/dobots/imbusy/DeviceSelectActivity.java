@@ -3,6 +3,7 @@ package nl.dobots.imbusy;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,7 @@ import nl.dobots.bluenet.extended.structs.BleDevice;
 import nl.dobots.bluenet.extended.structs.BleDeviceMap;
 
 
-public class DeviceSelectActivity extends Activity implements AdapterView.OnItemClickListener {
+public class DeviceSelectActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 	protected static final String TAG = DeviceSelectActivity.class.getCanonicalName();
 	protected static final int BACKGROUND_DEFAULT_COLOR = 0x00000000;
 	protected static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
@@ -74,12 +75,12 @@ public class DeviceSelectActivity extends Activity implements AdapterView.OnItem
 	}
 
 	private void initButtons(){
-		final Button doneButton = (Button) findViewById(R.id.doneButton);
-		doneButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				finish();
-			}
-		});
+//		final Button doneButton = (Button) findViewById(R.id.doneButton);
+//		doneButton.setOnClickListener(new View.OnClickListener() {
+//			public void onClick(View v) {
+//				finish();
+//			}
+//		});
 	}
 
 	private void updateListView() {

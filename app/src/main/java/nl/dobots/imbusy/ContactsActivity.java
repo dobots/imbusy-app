@@ -93,12 +93,12 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 	}
 
 	private void initButtons(){
-		final Button doneButton = (Button) findViewById(R.id.doneButton);
-		doneButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				finish();
-			}
-		});
+//		final Button doneButton = (Button) findViewById(R.id.doneButton);
+//		doneButton.setOnClickListener(new View.OnClickListener() {
+//			public void onClick(View v) {
+//				finish();
+//			}
+//		});
 
 		final Button addButton = (Button) findViewById(R.id.addButton);
 		addButton.setOnClickListener(new View.OnClickListener() {
@@ -222,7 +222,7 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 						break;
 					case both:
 					case to:
-						infoText = ImBusyApp.getStatus(friend.getMode()).name();
+						infoText = ImBusyApp.getInstance().getStatusText(ImBusyApp.getStatus(friend.getMode()));
 						break;
 				}
 				contactInfoView.setText(friend.getUsername() + "\n" + infoText);

@@ -158,16 +158,31 @@ public class MainActivity extends AppCompatActivity {
 		if (status == null) {
 			return;
 		}
-		String text = getString(R.string.status_prefix) + " ";
+		String text = getString(R.string.status_prefix) + " " + ImBusyApp.getInstance().getStatusText(status);
+		final TextView statusTextView = (TextView) findViewById(R.id.status_text);
+		statusTextView.setText(text);
+	}
+
+	private void setXmppConnectionStatus(XmppService.XmppStatus status) {
+		if (status == null) {
+			return;
+		}
+		String text = getString(R.string.xmpp_connection_status_prefix);
 		switch (status) {
-			case AVAILABLE:
-				text += getString(R.string.status_available);
+			case CONNECTING:
+			case CONNECTED:
+			case AUTHENTICATING:
+				text += getString(R.string.xmpp_connection_status_connecting);
 				break;
-			case BUSY:
-				text += getString(R.string.status_busy);
+			case AUTHENTICATED:
+				text += getString(R.string.xmpp_connection_status_ok);
+				break;
+			case DISCONNECTED:
+				text += getString(R.string.xmpp_connection_status_error);
 				break;
 		}
-		final TextView statusTextView = (TextView) findViewById(R.id.status_text);
+
+		final TextView statusTextView = (TextView) findViewById(R.id.xmpp_connection_status);
 		statusTextView.setText(text);
 	}
 
@@ -245,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
 	private final XmppServiceListener _xmppListener = new XmppServiceListener() {
 		@Override
 		public void onConnectStatus(XmppService.XmppStatus status) {
+			setXmppConnectionStatus(status);
 			switch (status) {
 				case AUTHENTICATED: {
 					_loginButton.setText(getString(R.string.login_button_logged_in));

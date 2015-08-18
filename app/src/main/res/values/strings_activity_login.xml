@@ -1,7 +1,7 @@
 <resources>
+	<!--
 	<string name="title_activity_login">Sign in</string>
 
-	<!-- Strings related to login -->
 	<string name="prompt_email">Your phone number</string>
 	<string name="prompt_password">Password</string>
 	<string name="action_sign_in">Sign in or register</string>
@@ -14,4 +14,5 @@
 	<string name="error_field_required">This field is required</string>
 	<string name="error_unable_to_connect">Unable to connect to server</string>
 	<string name="error_disconnected">Disconnected from server</string>
+	-->
 </resources>

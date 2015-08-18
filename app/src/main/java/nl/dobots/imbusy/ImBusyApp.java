@@ -314,6 +314,16 @@ public class ImBusyApp extends Application {
 		}
 	}
 
+	public final String getStatusText(Status status) {
+		switch (status) {
+			case BUSY:
+				return getString(R.string.status_busy);
+			case AVAILABLE:
+			default:
+				return getString(R.string.status_available);
+		}
+	}
+
 	public static String getXmppUsername(String phoneNumber) {
 		return phoneNumber;
 	}

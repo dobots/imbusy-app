@@ -2,6 +2,7 @@ package nl.dobots.imbusy;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +17,7 @@ import android.widget.TextView;
 import java.util.List;
 
 
-public class DeviceSettingsActivity extends Activity implements AdapterView.OnItemClickListener {
+public class DeviceSettingsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 	private static final String TAG = DeviceSelectActivity.class.getCanonicalName();
 	private static final int BACKGROUND_DEFAULT_COLOR = 0x00000000;
 	private static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
@@ -64,12 +65,12 @@ public class DeviceSettingsActivity extends Activity implements AdapterView.OnIt
 	}
 
 	private void initButtons(){
-		final Button doneButton = (Button) findViewById(R.id.doneButton);
-		doneButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				finish();
-			}
-		});
+//		final Button doneButton = (Button) findViewById(R.id.doneButton);
+//		doneButton.setOnClickListener(new View.OnClickListener() {
+//			public void onClick(View v) {
+//				finish();
+//			}
+//		});
 	}
 
 	@Override
