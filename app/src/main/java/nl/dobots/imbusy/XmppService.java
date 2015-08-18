@@ -31,7 +31,9 @@ public class XmppService extends Service {
 	private static final int STATUS_POLL_DELAY = 500;
 	private XmppThread _xmppThread = null;
 	private Handler _handler;
+	private XmppStatus _status = XmppStatus.DISCONNECTED;
 	private XmppFriendList _friendList = new XmppFriendList();
+	private XmppFriendList _friendRequestList = new XmppFriendList();
 
 	private Set<XmppServiceListener> _listenerList = new HashSet<>();
 	enum XmppStatus {
@@ -187,12 +189,16 @@ public class XmppService extends Service {
 
 	/** Answers a friend request, either accept or reject, else it will be asked again later (on login) */
 	public void xmppAnswerFriendRequest(String username, boolean accept) {
+		String jid = username + "@" + XMPP_DOMAIN;
 		Message msg = Message.obtain(null, XmppThread.MSG_FRIEND_REQUEST_RESPONSE);
 		Bundle data = new Bundle();
-		data.putString("jid", username + "@" + XMPP_DOMAIN);
+		data.putString("jid", jid);
 		data.putBoolean("accept", accept);
 		msg.setData(data);
 		sendMessage(msg);
+		if (_status == XmppStatus.AUTHENTICATED) {
+			_friendRequestList.remove(jid);
+		}
 	}
 
 
@@ -201,6 +207,7 @@ public class XmppService extends Service {
 	}
 
 	private void onXmppConnected() {
+		_status = XmppStatus.CONNECTED;
 		sendToListeners(XmppStatus.CONNECTED);
 	}
 
@@ -210,7 +217,7 @@ public class XmppService extends Service {
 	}
 
 	private void onXmppAuthenticated() {
-//		sendMessage(XmppThread.MSG_GET_FRIENDS); // Don't have the roster here yet..
+		_status = XmppStatus.AUTHENTICATED;
 		sendToListeners(XmppStatus.AUTHENTICATED);
 	}
 
@@ -219,6 +226,7 @@ public class XmppService extends Service {
 	}
 
 	private void onXmppDisconnected() {
+		_status = XmppStatus.DISCONNECTED;
 		sendToListeners(XmppStatus.DISCONNECTED);
 	}
 
@@ -259,6 +267,7 @@ public class XmppService extends Service {
 			return;
 		}
 		XmppFriend friend = new XmppFriend(jid, null, null, null);
+		_friendRequestList.add(friend);
 		sendToListeners(XmppFriendEvent.FRIEND_REQUEST, friend);
 	}
 
@@ -309,6 +318,10 @@ public class XmppService extends Service {
 
 	public XmppFriendList getFriendList() {
 		return _friendList;
+	}
+
+	public XmppFriendList getFriendRequestList() {
+		return _friendRequestList;
 	}
 
 	//	private void updateOwnStatus() {
