@@ -1,8 +1,11 @@
 package nl.dobots.imbusy;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
@@ -120,7 +123,7 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 		Log.d(TAG, "Picked: number=" + phoneNumber + " name=" + name);
 //		_contactList.add(new PhoneContact(phoneNumber, name));
 //		_contactListCopy = _contactList.toList();
-		_xmppService.xmppAddFriend(phoneNumber, name);
+		_xmppService.xmppAddFriend(ImBusyApp.getXmppUsername(phoneNumber), name);
 	}
 
 
@@ -160,12 +163,27 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//		PhoneContact contact = _contactListCopy.get(position);
-//		Log.d(TAG, "clicked item " + position + " " + contact.getNumber());
-//		_xmppService.xmppRemoveFriend(contact.getNumber());
-		XmppFriend friend = _friendListCopy.get(position);
+		final XmppFriend friend = _friendListCopy.get(position);
 		Log.d(TAG, "clicked item " + position + " " + friend.getUsername());
-		_xmppService.xmppRemoveFriend(friend.getUsername());
+		String number = ImBusyApp.getNumber(friend.getJid());
+		String name = friend.getNick();
+
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+		dialogBuilder.setTitle("Remove friend");
+		dialogBuilder.setMessage("Do you want to remove " + name + " (" + number + ")?");
+		dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				_xmppService.xmppRemoveFriend(friend.getJid());
+			}
+		});
+		dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+//		dialogBuilder.setIcon();
+		Dialog dialog = dialogBuilder.show();
 	}
 
 	private class ContactListAdapter extends BaseAdapter {

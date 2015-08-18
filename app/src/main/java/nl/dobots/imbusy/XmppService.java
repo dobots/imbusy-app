@@ -179,10 +179,10 @@ public class XmppService extends Service {
 	}
 
 	/** Removes a friend on XMPP, also denies this friend's subscription to you */
-	public void xmppRemoveFriend(String username) {
+	public void xmppRemoveFriend(String jid) {
 		Message msg = Message.obtain(null, XmppThread.MSG_REMOVE_FRIEND);
 		Bundle data = new Bundle();
-		data.putString("jid", username + "@" + XMPP_DOMAIN);
+		data.putString("jid", jid);
 		msg.setData(data);
 		sendMessage(msg);
 	}
