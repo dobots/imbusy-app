@@ -1,16 +1,21 @@
 package nl.dobots.imbusy;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.provider.ContactsContract;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import org.jivesoftware.smack.packet.Presence;
@@ -40,6 +45,10 @@ public class ImBusyApp extends Application {
 	private static final String PREFERENCES_FILE = "ImBusyPreferences";
 	public static final String PREFERENCE_PHONE_NUMBER = "phoneNumber";
 	public static final String PREFERENCE_PASSWORD = "password";
+	public static final int IMBUSY_NOTIFICATION_ID = 1;
+
+	private NotificationManager _notificationManager;
+	private NotificationCompat.Builder _notificationBuilder;
 
 	private BleExt _ble;
 	private StoredBleDeviceList _storedDeviceList;
@@ -83,6 +92,8 @@ public class ImBusyApp extends Application {
 		_context = this.getApplicationContext();
 
 		_handler = new Handler();
+
+		_notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
 		_preferences = getSharedPreferences(PREFERENCES_FILE, MODE_PRIVATE);
 //		_phoneNumber = _preferences.getString("phoneNumber", "");
@@ -189,6 +200,25 @@ public class ImBusyApp extends Application {
 						friend.setNick(name);
 					}
 					break;
+				}
+				case FRIEND_REQUEST:{
+					String number = friend.getUsername();
+					String name = getContactName(number);
+					String text = name + " (" + number + ") wants to see your status.";
+
+					Intent contentIntent = new Intent(_context, MainActivity.class);
+					contentIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+					PendingIntent piContent = PendingIntent.getActivity(_context, 0, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+					_notificationBuilder = new NotificationCompat.Builder(_context);
+					_notificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
+					_notificationBuilder.setContentTitle("Friend request");
+					_notificationBuilder.setContentText(text);
+					_notificationBuilder.setContentIntent(piContent);
+					_notificationBuilder.setAutoCancel(true);
+					_notificationBuilder.setDefaults(Notification.DEFAULT_SOUND);
+					_notificationBuilder.setLights(Color.BLUE, 500, 1000);
+					_notificationManager.notify(IMBUSY_NOTIFICATION_ID, _notificationBuilder.build());
 				}
 			}
 		}
