@@ -75,6 +75,20 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		// User opened the activity
+		ImBusyApp.getInstance().onActivityOpen(MainActivity.class);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		// User left the activity
+		ImBusyApp.getInstance().onActivityOpen(MainActivity.class);
+	}
+
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "onDestroy");

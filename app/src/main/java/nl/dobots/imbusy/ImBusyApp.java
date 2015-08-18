@@ -1,5 +1,6 @@
 package nl.dobots.imbusy;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -147,6 +148,17 @@ public class ImBusyApp extends Application {
 		for (ImBusyListener listener : _listenerList) {
 			listener.onStatus(status);
 		}
+	}
+
+	/** Should be called when an activity is opened */
+//	public void onActivityOpen(Activity activity) {
+	public void onActivityOpen(Class activityClass) {
+		_notificationManager.cancel(IMBUSY_NOTIFICATION_ID);
+	}
+
+	/** Should be called when an activity is closed */
+	public void onActivityClose(Class activityClass) {
+
 	}
 
 	public void onOutgoingCall(String number) {
