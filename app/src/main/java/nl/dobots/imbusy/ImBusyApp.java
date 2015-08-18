@@ -196,6 +196,13 @@ public class ImBusyApp extends Application {
 		@Override
 		public void onConnectStatus(XmppService.XmppStatus status) {
 			_xmppStatus = status;
+			switch (status) {
+				case AUTHENTICATED:{
+					// After authentication, all numbers are added again, so we start with a clean list
+					_contactList.clear();
+					break;
+				}
+			}
 		}
 
 		@Override
@@ -205,16 +212,26 @@ public class ImBusyApp extends Application {
 
 		@Override
 		public void onFriend(XmppService.XmppFriendEvent event, XmppFriend friend) {
+			String number = getNumber(friend.getJid());
 			switch (event) {
 				case ADDED:{
-					if (friend.getNick() == null) {
-						String name = getContactName(getNumber(friend.getJid()));
+					String name = getContactName(getNumber(friend.getJid()));
+//					if (friend.getNick() == null) {
+//						String name = getContactName(getNumber(friend.getJid()));
 						friend.setNick(name);
-					}
+//					}
+					_contactList.add(new PhoneContact(number, name));
+					break;
+				}
+				case REMOVED: {
+					_contactList.remove(number);
+					break;
+				}
+				case FRIEND_UPDATE: {
+					_contactList.get(number).setStatus(getStatus(friend.getMode()));
 					break;
 				}
 				case FRIEND_REQUEST:{
-					String number = friend.getUsername();
 					String name = getContactName(number);
 					String text = name + " (" + number + ") wants to see your status.";
 
