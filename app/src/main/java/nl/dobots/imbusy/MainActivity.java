@@ -175,6 +175,39 @@ public class MainActivity extends AppCompatActivity {
 		startActivity(new Intent(this, LoginActivity.class));
 	}
 
+	private void checkFriendRequests() {
+		if (_xmppService == null) {
+			return;
+		}
+		XmppFriendList requests = _xmppService.getFriendRequestList();
+		for (XmppFriend friend : requests.values()) {
+			handleFriendRequest(friend);
+		}
+	}
+
+	private void handleFriendRequest(final XmppFriend friend) {
+		String number = friend.getUsername();
+		String name = ImBusyApp.getInstance().getContactName(number);
+		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(_context);
+		dialogBuilder.setTitle("Friend request");
+		dialogBuilder.setMessage(name + " (" + number + ") wants to see your status.");
+		dialogBuilder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Log.d(TAG, "Accept friend request here");
+				_xmppService.xmppAnswerFriendRequest(friend.getUsername(), true);
+			}
+		});
+		dialogBuilder.setNegativeButton("Deny", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Log.d(TAG, "Deny friend request here");
+				_xmppService.xmppAnswerFriendRequest(friend.getUsername(), false);
+			}
+		});
+//		dialogBuilder.setIcon();
+		Dialog dialog = dialogBuilder.show();
+	}
 
 	private final ImBusyListener _imBusyListener = new ImBusyListener() {
 		@Override
@@ -188,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			_xmppService = ((XmppService.XmppBinder)service).getService();
 			_xmppService.addListener(_xmppListener);
+			checkFriendRequests();
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
@@ -233,27 +267,7 @@ public class MainActivity extends AppCompatActivity {
 					break;
 				}
 				case FRIEND_REQUEST:{
-					String number = friend.getUsername();
-					String name = ImBusyApp.getInstance().getContactName(number);
-					AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(_context);
-					dialogBuilder.setTitle("Friend request");
-					dialogBuilder.setMessage(name + " (" + number + ") wants to see your status.");
-					dialogBuilder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							Log.d(TAG, "Accept friend request here");
-							_xmppService.xmppAnswerFriendRequest(friend.getUsername(), true);
-						}
-					});
-					dialogBuilder.setNegativeButton("Deny", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							Log.d(TAG, "Deny friend request here");
-							_xmppService.xmppAnswerFriendRequest(friend.getUsername(), false);
-						}
-					});
-//					dialogBuilder.setIcon();
-					Dialog dialog = dialogBuilder.show();
+					handleFriendRequest(friend);
 					break;
 				}
 			}
