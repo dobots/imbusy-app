@@ -112,7 +112,9 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 	}
 
 	private void addContact() {
+		// See http://developer.android.com/training/basics/intents/result.html
 		Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+		intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
 		startActivityForResult(intent, PICK_CONTACT);
 	}
 
@@ -133,28 +135,13 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 		if (requestCode == PICK_CONTACT) {
 			if (resultCode == RESULT_OK) {
 				Uri uri = intent.getData();
-				ContentResolver contentResolver = getContentResolver();
-				Cursor cursor = contentResolver.query(uri, null, null, null, null);
-//				Cursor cursor =  managedQuery(uri, null, null, null, null); // Deprecated
+				String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
+				Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 				if (cursor == null || !cursor.moveToFirst()) {
 					return;
 				}
-				String id = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts._ID));
-				String hasPhone = cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.Contacts.HAS_PHONE_NUMBER));
-				if (!hasPhone.equals("1")) {
-					return;
-				}
-
-				String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
-				Cursor phones = getContentResolver().query(
-						ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-						projection,
-						ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + id,
-						null,
-						null);
-				phones.moveToFirst();
-				String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-				String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+				String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+				String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
 				addContact(phoneNumber, name);
 			}
 		}
