@@ -17,12 +17,27 @@ import android.widget.TextView;
 
 import java.util.List;
 
+/**
+ * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.
+ * <p/>
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ * <p/>
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ * <p/>
+ * Created on 30-7-15
+ *
+ * @author Bart van Vliet
+ */
 
 public class DeviceSettingsActivity extends AppCompatActivity
 		implements AdapterView.OnItemClickListener {
 	private static final String TAG = DeviceSelectActivity.class.getCanonicalName();
-	private static final int BACKGROUND_DEFAULT_COLOR = 0x00000000;
-	private static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
 	private static final int THRESHOLD_SLIDER_MIN = -100;
 
 

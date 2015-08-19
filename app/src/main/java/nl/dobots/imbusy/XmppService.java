@@ -21,14 +21,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by Bart van Vliet on 4-8-15.
+ * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.
+ * <p/>
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ * <p/>
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ * <p/>
+ * Created on 4-8-15
+ *
+ * @author Bart van Vliet
  */
+
 public class XmppService extends Service {
 	private static final String TAG = XmppService.class.getCanonicalName();
-	private static final String XMPP_DOMAIN = "dobots.customers.luna.net";
-	private static final String XMPP_HOST = "dobots.customers.luna.net";
-	private static final int XMPP_PORT = 5222;
-	private static final int STATUS_POLL_DELAY = 500;
+
 	private XmppThread _xmppThread = null;
 	private Handler _handler;
 	private XmppStatus _status = XmppStatus.DISCONNECTED;
@@ -78,9 +90,9 @@ public class XmppService extends Service {
 
 		XMPPTCPConnectionConfiguration.Builder configBuilder = XMPPTCPConnectionConfiguration.builder();
 		configBuilder.setUsernameAndPassword(number, password);
-		configBuilder.setServiceName(XMPP_DOMAIN);
-		configBuilder.setHost(XMPP_HOST);
-		configBuilder.setPort(XMPP_PORT);
+		configBuilder.setServiceName(Config.XMPP_DOMAIN);
+		configBuilder.setHost(Config.XMPP_HOST);
+		configBuilder.setPort(Config.XMPP_PORT);
 		configBuilder.setDebuggerEnabled(true);
 
 		// TODO: make sure we use a secure connection!
@@ -172,7 +184,7 @@ public class XmppService extends Service {
 	public void xmppAddFriend(String username, String nick) {
 		Message msg = Message.obtain(null, XmppThread.MSG_ADD_FRIEND);
 		Bundle data = new Bundle();
-		data.putString("jid", username + "@" + XMPP_DOMAIN);
+		data.putString("jid", username + "@" + Config.XMPP_DOMAIN);
 		data.putString("nick", nick);
 		msg.setData(data);
 		sendMessage(msg);
@@ -189,7 +201,7 @@ public class XmppService extends Service {
 
 	/** Answers a friend request, either accept or reject, else it will be asked again later (on login) */
 	public void xmppAnswerFriendRequest(String username, boolean accept) {
-		String jid = username + "@" + XMPP_DOMAIN;
+		String jid = username + "@" + Config.XMPP_DOMAIN;
 		Message msg = Message.obtain(null, XmppThread.MSG_FRIEND_REQUEST_RESPONSE);
 		Bundle data = new Bundle();
 		data.putString("jid", jid);

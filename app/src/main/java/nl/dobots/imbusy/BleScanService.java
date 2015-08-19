@@ -12,8 +12,23 @@ import nl.dobots.bluenet.extended.BleExt;
 import nl.dobots.bluenet.extended.structs.BleDevice;
 
 /**
- * Created by vliedel on 24-7-15.
+ * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.
+ * <p/>
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ * <p/>
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ * <p/>
+ * Created on 24-7-15
+ *
+ * @author Bart van Vliet
  */
+
 public class BleScanService extends Service {
 	private static final String TAG = BleScanService.class.getCanonicalName();
 	private BleExt _ble;
@@ -37,7 +52,7 @@ public class BleScanService extends Service {
 		public void run() {
 //			Log.d(TAG, "Start endless scan");
 			_ble.startIntervalScan(_deviceCallback);
-			_handler.postDelayed(_stopScanRunnable, 1000);
+			_handler.postDelayed(_stopScanRunnable, Config.BLE_SCAN_INTERVAL);
 		}
 	};
 	private Runnable _stopScanRunnable = new Runnable() {
@@ -47,11 +62,11 @@ public class BleScanService extends Service {
 			_ble.stopScan(new IStatusCallback() {
 				@Override
 				public void onSuccess() {
-					_handler.postDelayed(_startScanRunnable, 9000);
+					_handler.postDelayed(_startScanRunnable, Config.BLE_SCAN_PAUSE);
 				}
 				@Override
 				public void onError(int error) {
-					_handler.postDelayed(_startScanRunnable, 9000);
+					_handler.postDelayed(_startScanRunnable, Config.BLE_SCAN_PAUSE);
 				}
 			});
 		}
@@ -73,12 +88,13 @@ public class BleScanService extends Service {
 
 			}
 		});
+
+		startIntervalScan();
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		//The service will at this point continue running until Context.stopService() or stopSelf() is called
-		startIntervalScan();
 		return Service.START_STICKY;
 	}
 

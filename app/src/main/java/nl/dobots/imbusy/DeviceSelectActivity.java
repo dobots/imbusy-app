@@ -20,11 +20,26 @@ import java.util.List;
 import nl.dobots.bluenet.extended.structs.BleDevice;
 import nl.dobots.bluenet.extended.structs.BleDeviceMap;
 
+/**
+ * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.
+ * <p/>
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ * <p/>
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ * <p/>
+ * Created on 30-7-15
+ *
+ * @author Bart van Vliet
+ */
 
 public class DeviceSelectActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 	protected static final String TAG = DeviceSelectActivity.class.getCanonicalName();
-	protected static final int BACKGROUND_DEFAULT_COLOR = 0x00000000;
-	protected static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
 
 	private ListView _deviceListView;
 	private DeviceListAdapter _deviceListAdapter;
@@ -105,11 +120,11 @@ public class DeviceSelectActivity extends AppCompatActivity implements AdapterVi
 		BleDevice device = _scannedDeviceListCopy.get(position);
 		Log.d(TAG, "clicked item " + position + " " + device.getAddress());
 		if (!_storedDeviceList.contains(device.getAddress())) {
-			view.setBackgroundColor(BACKGROUND_SELECTED_COLOR);
+			view.setBackgroundColor(Config.BACKGROUND_SELECTED_COLOR);
 			_storedDeviceList.add(new StoredBleDevice(device.getAddress(), device.getName()));
 		}
 		else {
-			view.setBackgroundColor(BACKGROUND_DEFAULT_COLOR);
+			view.setBackgroundColor(Config.BACKGROUND_DEFAULT_COLOR);
 			_storedDeviceList.remove(device.getAddress());
 		}
 	}
@@ -164,10 +179,10 @@ public class DeviceSelectActivity extends AppCompatActivity implements AdapterVi
 				infoText += "\n" + getResources().getString(R.string.rssi_prefix) + " " + device.getRssi();
 				viewHolder.deviceInfoView.setText(infoText);
 				if (_storedDeviceList.contains(device.getAddress())) {
-					convertView.setBackgroundColor(BACKGROUND_SELECTED_COLOR);
+					convertView.setBackgroundColor(Config.BACKGROUND_SELECTED_COLOR);
 				}
 				else {
-					convertView.setBackgroundColor(BACKGROUND_DEFAULT_COLOR);
+					convertView.setBackgroundColor(Config.BACKGROUND_DEFAULT_COLOR);
 				}
 			}
 

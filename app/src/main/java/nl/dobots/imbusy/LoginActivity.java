@@ -40,8 +40,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A login screen that offers login via email/password.
+ * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.
+ * <p/>
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ * <p/>
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ * <p/>
+ * Created on 0-0-15
+ *
+ * @author Bart van Vliet
+ * Based on: login template
  */
+
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 	private static final String TAG = LoginActivity.class.getCanonicalName();
 	private Context _context;

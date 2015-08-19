@@ -28,7 +28,21 @@ import nl.dobots.bluenet.extended.structs.BleDevice;
 import nl.dobots.bluenet.extended.structs.BleDeviceMap;
 
 /**
- * Created by Bart van Vliet on 24-7-15.
+ * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.
+ * <p/>
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ * <p/>
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ * <p/>
+ * Created on 24-7-15
+ *
+ * @author Bart van Vliet
  */
 
 
@@ -45,7 +59,6 @@ public class ImBusyApp extends Application {
 	private static final String PREFERENCES_FILE = "ImBusyPreferences";
 	public static final String PREFERENCE_PHONE_NUMBER = "phoneNumber";
 	public static final String PREFERENCE_PASSWORD = "password";
-	public static final int IMBUSY_NOTIFICATION_ID = 1;
 
 	private NotificationManager _notificationManager;
 	private NotificationCompat.Builder _notificationBuilder;
@@ -152,7 +165,7 @@ public class ImBusyApp extends Application {
 	/** Should be called when an activity is opened */
 //	public void onActivityOpen(Activity activity) {
 	public void onActivityOpen(Class activityClass) {
-		_notificationManager.cancel(IMBUSY_NOTIFICATION_ID);
+		_notificationManager.cancel(Config.IMBUSY_NOTIFICATION_ID_FRIEND_REQUEST);
 	}
 
 	/** Should be called when an activity is closed */
@@ -246,7 +259,7 @@ public class ImBusyApp extends Application {
 					_notificationBuilder.setAutoCancel(true);
 					_notificationBuilder.setDefaults(Notification.DEFAULT_SOUND);
 					_notificationBuilder.setLights(Color.BLUE, 500, 1000);
-					_notificationManager.notify(IMBUSY_NOTIFICATION_ID, _notificationBuilder.build());
+					_notificationManager.notify(Config.IMBUSY_NOTIFICATION_ID_FRIEND_REQUEST, _notificationBuilder.build());
 				}
 			}
 		}
@@ -261,7 +274,7 @@ public class ImBusyApp extends Application {
 		_status = status;
 		sendToListeners(status);
 		_handler.removeCallbacks(_setAvailable);
-		_handler.postDelayed(_setAvailable, 30000); // TODO: magic nr
+		_handler.postDelayed(_setAvailable, Config.BUSY_TIMEOUT);
 	}
 
 	public StoredBleDeviceList getStoredDeviceList() {
