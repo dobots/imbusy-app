@@ -59,6 +59,7 @@ public class ImBusyApp extends Application {
 	private static final String PREFERENCES_FILE = "ImBusyPreferences";
 	public static final String PREFERENCE_PHONE_NUMBER = "phoneNumber";
 	public static final String PREFERENCE_PASSWORD = "password";
+	public static final int IMBUSY_NOTIFICATION_ID_FRIEND_REQUEST = 1;
 
 	private NotificationManager _notificationManager;
 	private NotificationCompat.Builder _notificationBuilder;
@@ -165,7 +166,7 @@ public class ImBusyApp extends Application {
 	/** Should be called when an activity is opened */
 //	public void onActivityOpen(Activity activity) {
 	public void onActivityOpen(Class activityClass) {
-		_notificationManager.cancel(Config.IMBUSY_NOTIFICATION_ID_FRIEND_REQUEST);
+		_notificationManager.cancel(IMBUSY_NOTIFICATION_ID_FRIEND_REQUEST);
 	}
 
 	/** Should be called when an activity is closed */
@@ -259,7 +260,7 @@ public class ImBusyApp extends Application {
 					_notificationBuilder.setAutoCancel(true);
 					_notificationBuilder.setDefaults(Notification.DEFAULT_SOUND);
 					_notificationBuilder.setLights(Color.BLUE, 500, 1000);
-					_notificationManager.notify(Config.IMBUSY_NOTIFICATION_ID_FRIEND_REQUEST, _notificationBuilder.build());
+					_notificationManager.notify(IMBUSY_NOTIFICATION_ID_FRIEND_REQUEST, _notificationBuilder.build());
 				}
 			}
 		}
