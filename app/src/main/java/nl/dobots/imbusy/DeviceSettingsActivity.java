@@ -121,7 +121,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 		private class ViewHolder {
 			protected TextView deviceNameView;
 			protected TextView deviceInfoView;
-//			protected TextView thresholdView;
+			protected TextView thresholdView;
 			protected SeekBar thresholdSlider;
 		}
 
@@ -133,41 +133,42 @@ public class DeviceSettingsActivity extends AppCompatActivity
 				LayoutInflater layoutInflater = (LayoutInflater) parent.getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 				convertView = layoutInflater.inflate(R.layout.device_settings_item, null);
 
-//				final ViewHolder viewHolder = new ViewHolder();
-//				viewHolder.deviceNameView = (TextView) convertView.findViewById(R.id.deviceName);
-//				viewHolder.deviceInfoView = (TextView) convertView.findViewById(R.id.deviceInfo);
-////				viewHolder.thresholdView = (TextView) convertView.findViewById(R.id.thresholdText);
-//				viewHolder.thresholdSlider = (SeekBar) convertView.findViewById(R.id.thresholdSlider);
-//				convertView.setTag(viewHolder);
+				ViewHolder viewHolder = new ViewHolder();
+				viewHolder.deviceNameView = (TextView) convertView.findViewById(R.id.deviceName);
+				viewHolder.deviceInfoView = (TextView) convertView.findViewById(R.id.deviceInfo);
+				viewHolder.thresholdView = (TextView) convertView.findViewById(R.id.thresholdText);
+				viewHolder.thresholdSlider = (SeekBar) convertView.findViewById(R.id.thresholdSlider);
+				convertView.setTag(viewHolder);
 			}
 
-//			ViewHolder viewHolder = (ViewHolder) convertView.getTag();
+			final ViewHolder viewHolder = (ViewHolder) convertView.getTag();
 
 			StoredBleDevice device = (StoredBleDevice)getItem(position);
 
 //			if (device != null) {
-				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
-				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
-				final TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
-				SeekBar thresholdSlider = (SeekBar)convertView.findViewById(R.id.thresholdSlider);
-				deviceNameView.setText(device.getName());
-				deviceInfoView.setText(device.getAddress());
-//				viewHolder.deviceNameView.setText(device.getName());
-//				viewHolder.deviceInfoView.setText(device.getAddress());
+//				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
+//				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
+//				final TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
+//				SeekBar thresholdSlider = (SeekBar)convertView.findViewById(R.id.thresholdSlider);
+//				deviceNameView.setText(device.getName());
+//				deviceInfoView.setText(device.getAddress());
+				viewHolder.deviceNameView.setText(device.getName());
+				viewHolder.deviceInfoView.setText(device.getAddress());
 
 				float threshold = device.getRssiThreshold();
 //				thresholdView.setText(Float.toString(device.getRssiThreshold())); // annoying format
 //				thresholdView.setText(String.format("%.2f", device.getRssiThreshold())); // trailing zeros
 //				thresholdView.setText(new DecimalFormat("#.#").format(threshold)); // Nice
-				thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (threshold)));
-				thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
-				thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-//				setOnSeekBarChangeListener(thresholdSlider, position, thresholdView);
-				thresholdSlider.setTag(position);
-				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//				viewHolder.thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
-//				viewHolder.thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-//				viewHolder.thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//				thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (threshold)));
+				viewHolder.thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (threshold)));
+//				thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
+//				thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
+//				thresholdSlider.setTag(position);
+//				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+				viewHolder.thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
+				viewHolder.thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
+				viewHolder.thresholdSlider.setTag(position);
+				viewHolder.thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 					}
@@ -184,7 +185,8 @@ public class DeviceSettingsActivity extends AppCompatActivity
 //						View parentView = (View) seekBar.getParent();
 //						if (parentView != null) {
 //							TextView thresholdView =(TextView)parentView.findViewById(R.id.thresholdText);
-							thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
+							viewHolder.thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
+//							thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
 //						}
 					}
 				});
