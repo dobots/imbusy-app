@@ -2,6 +2,7 @@ package nl.dobots.imbusy;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 	private DeviceListAdapter _deviceListAdapter;
 	private StoredBleDeviceList _deviceList;
 	private List<StoredBleDevice> _deviceListCopy;
+	private Handler _handler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 
 		_deviceList = ImBusyApp.getInstance().getStoredDeviceList();
 		_deviceListCopy = _deviceList.toList();
+		_handler = new Handler();
 
 		initListView();
 		initButtons();
@@ -122,34 +125,9 @@ public class DeviceSettingsActivity extends AppCompatActivity
 			protected SeekBar thresholdSlider;
 		}
 
-		private void setOnSeekBarChangeListener(SeekBar seekbar, final int position) {
-			seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-				@Override
-				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-					Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
-					_deviceListCopy.get(position).setRssiThreshold((float) (progress + THRESHOLD_SLIDER_MIN));
-//					thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(_deviceListCopy.get(position).getRssiThreshold())));
-
-//					Log.d(TAG, "stored device list:");
-//					for (StoredBleDevice dev : _deviceList.values()) {
-//						Log.d(TAG, dev.getAddress() + " " + dev.getRssiThreshold());
-//					}
-//					Log.d(TAG, "end of list");
-				}
-
-				@Override
-				public void onStartTrackingTouch(SeekBar seekBar) {
-				}
-
-				@Override
-				public void onStopTrackingTouch(SeekBar seekBar) {
-				}
-			});
-		}
-
 		@Override
-		public View getView(final int position, View convertView, ViewGroup parent) {
-//			final int devicePosition = position;
+		public View getView(int position, View convertView, ViewGroup parent) {
+			Log.d(TAG, "getView convertView=" + convertView + " position=" + position);
 			if (convertView == null) {
 				// LayoutInflater class is used to instantiate layout XML file into its corresponding View objects.
 				LayoutInflater layoutInflater = (LayoutInflater) parent.getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -170,7 +148,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 //			if (device != null) {
 				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
 				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
-				final TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
+				TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
 				SeekBar thresholdSlider = (SeekBar)convertView.findViewById(R.id.thresholdSlider);
 				deviceNameView.setText(device.getName());
 				deviceInfoView.setText(device.getAddress());
@@ -184,26 +162,32 @@ public class DeviceSettingsActivity extends AppCompatActivity
 				thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (threshold)));
 				thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
 				thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-				setOnSeekBarChangeListener(thresholdSlider, position);
-//				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-////				viewHolder.thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
-////				viewHolder.thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-////				viewHolder.thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//					@Override
-//					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//						Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
-//						_deviceListCopy.get(position).setRssiThreshold((float) (progress + THRESHOLD_SLIDER_MIN));
-//						thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(_deviceListCopy.get(position).getRssiThreshold())));
-//					}
-//
-//					@Override
-//					public void onStartTrackingTouch(SeekBar seekBar) {
-//					}
-//
-//					@Override
-//					public void onStopTrackingTouch(SeekBar seekBar) {
-//					}
-//				});
+//				setOnSeekBarChangeListener(thresholdSlider, position, thresholdView);
+				thresholdSlider.setTag(position);
+				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//				viewHolder.thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
+//				viewHolder.thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
+//				viewHolder.thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+					@Override
+					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					}
+
+					@Override
+					public void onStartTrackingTouch(SeekBar seekBar) {
+					}
+
+					@Override
+					public void onStopTrackingTouch(SeekBar seekBar) {
+						int position = (Integer)seekBar.getTag();
+						Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
+						_deviceListCopy.get(position).setRssiThreshold((float) (seekBar.getProgress() + THRESHOLD_SLIDER_MIN));
+						View parentView = (View) seekBar.getParent();
+						if (parentView != null) {
+							TextView thresholdView =(TextView)parentView.findViewById(R.id.thresholdText);
+							thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
+						}
+					}
+				});
 
 
 //				if (_deviceList.contains(device.getAddress())) {
