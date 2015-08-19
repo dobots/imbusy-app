@@ -1,6 +1,5 @@
 package nl.dobots.imbusy;
 
-import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -262,7 +261,7 @@ public class ImBusyApp extends Application {
 		_status = status;
 		sendToListeners(status);
 		_handler.removeCallbacks(_setAvailable);
-		_handler.postDelayed(_setAvailable, 10000); // TODO: magic nr
+		_handler.postDelayed(_setAvailable, 30000); // TODO: magic nr
 	}
 
 	public StoredBleDeviceList getStoredDeviceList() {
