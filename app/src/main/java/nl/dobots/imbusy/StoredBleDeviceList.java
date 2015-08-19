@@ -142,6 +142,7 @@ public class StoredBleDeviceList extends HashMap<String, StoredBleDevice> {
 				deviceToValue(device, values);
 				// Replace inserts or replaces when the key already exists
 				database.replace(TABLE_NAME, null, values);
+				Log.d(TAG, "replace " + values);
 			}
 			database.close();
 		}
@@ -188,6 +189,7 @@ public class StoredBleDeviceList extends HashMap<String, StoredBleDevice> {
 							cursor.getString(1),
 							cursor.getFloat(2)
 					);
+					Log.d(TAG, "Loaded " +device.getName() + " (" + device.getAddress() + ") threshold=" + device.getRssiThreshold());
 					devices.add(device);
 				} while (cursor.moveToNext());
 			}

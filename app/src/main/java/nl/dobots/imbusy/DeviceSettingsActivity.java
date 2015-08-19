@@ -17,7 +17,8 @@ import android.widget.TextView;
 import java.util.List;
 
 
-public class DeviceSettingsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class DeviceSettingsActivity extends AppCompatActivity
+		implements AdapterView.OnItemClickListener {
 	private static final String TAG = DeviceSelectActivity.class.getCanonicalName();
 	private static final int BACKGROUND_DEFAULT_COLOR = 0x00000000;
 	private static final int BACKGROUND_SELECTED_COLOR = 0x660000FF;
@@ -41,6 +42,12 @@ public class DeviceSettingsActivity extends AppCompatActivity implements Adapter
 
 		initListView();
 		initButtons();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		ImBusyApp.getInstance().getStoredDeviceList().save();
 	}
 
 	@Override
@@ -108,49 +115,95 @@ public class DeviceSettingsActivity extends AppCompatActivity implements Adapter
 			return 0;
 		}
 
+		private class ViewHolder {
+			protected TextView deviceNameView;
+			protected TextView deviceInfoView;
+//			protected TextView thresholdView;
+			protected SeekBar thresholdSlider;
+		}
+
+		private void setOnSeekBarChangeListener(SeekBar seekbar, final int position) {
+			seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
+					_deviceListCopy.get(position).setRssiThreshold((float) (progress + THRESHOLD_SLIDER_MIN));
+//					thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(_deviceListCopy.get(position).getRssiThreshold())));
+
+//					Log.d(TAG, "stored device list:");
+//					for (StoredBleDevice dev : _deviceList.values()) {
+//						Log.d(TAG, dev.getAddress() + " " + dev.getRssiThreshold());
+//					}
+//					Log.d(TAG, "end of list");
+				}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+				}
+			});
+		}
+
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
+//			final int devicePosition = position;
 			if (convertView == null) {
-				//LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-				LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+				// LayoutInflater class is used to instantiate layout XML file into its corresponding View objects.
+				LayoutInflater layoutInflater = (LayoutInflater) parent.getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 				convertView = layoutInflater.inflate(R.layout.device_settings_item, null);
+
+//				final ViewHolder viewHolder = new ViewHolder();
+//				viewHolder.deviceNameView = (TextView) convertView.findViewById(R.id.deviceName);
+//				viewHolder.deviceInfoView = (TextView) convertView.findViewById(R.id.deviceInfo);
+////				viewHolder.thresholdView = (TextView) convertView.findViewById(R.id.thresholdText);
+//				viewHolder.thresholdSlider = (SeekBar) convertView.findViewById(R.id.thresholdSlider);
+//				convertView.setTag(viewHolder);
 			}
 
-			final StoredBleDevice device = (StoredBleDevice)getItem(position);
-			Log.d(TAG, "device view:");
-			Log.d(TAG, device.getAddress());
+//			ViewHolder viewHolder = (ViewHolder) convertView.getTag();
 
+			StoredBleDevice device = (StoredBleDevice)getItem(position);
 
-			if (device != null) {
+//			if (device != null) {
 				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
 				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
 				final TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
 				SeekBar thresholdSlider = (SeekBar)convertView.findViewById(R.id.thresholdSlider);
 				deviceNameView.setText(device.getName());
 				deviceInfoView.setText(device.getAddress());
+//				viewHolder.deviceNameView.setText(device.getName());
+//				viewHolder.deviceInfoView.setText(device.getAddress());
 
 				float threshold = device.getRssiThreshold();
 //				thresholdView.setText(Float.toString(device.getRssiThreshold())); // annoying format
 //				thresholdView.setText(String.format("%.2f", device.getRssiThreshold())); // trailing zeros
 //				thresholdView.setText(new DecimalFormat("#.#").format(threshold)); // Nice
-				thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(threshold)));
+				thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (threshold)));
 				thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
-				thresholdSlider.setProgress((int)(device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-					@Override
-					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-						device.setRssiThreshold((float) (progress + THRESHOLD_SLIDER_MIN));
-						thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(device.getRssiThreshold())));
-					}
-
-					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {
-					}
-
-					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {
-					}
-				});
+				thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
+				setOnSeekBarChangeListener(thresholdSlider, position);
+//				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+////				viewHolder.thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
+////				viewHolder.thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
+////				viewHolder.thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//					@Override
+//					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//						Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
+//						_deviceListCopy.get(position).setRssiThreshold((float) (progress + THRESHOLD_SLIDER_MIN));
+//						thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int)(_deviceListCopy.get(position).getRssiThreshold())));
+//					}
+//
+//					@Override
+//					public void onStartTrackingTouch(SeekBar seekBar) {
+//					}
+//
+//					@Override
+//					public void onStopTrackingTouch(SeekBar seekBar) {
+//					}
+//				});
 
 
 //				if (_deviceList.contains(device.getAddress())) {
@@ -159,7 +212,7 @@ public class DeviceSettingsActivity extends AppCompatActivity implements Adapter
 //				else {
 //					convertView.setBackgroundColor(BACKGROUND_DEFAULT_COLOR);
 //				}
-			}
+//			}
 
 			return convertView;
 		}

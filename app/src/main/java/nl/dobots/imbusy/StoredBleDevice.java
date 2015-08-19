@@ -1,5 +1,7 @@
 package nl.dobots.imbusy;
 
+import android.util.Log;
+
 /**
  * Created by Bart van Vliet on 27-7-15.
  */
@@ -39,6 +41,7 @@ public class StoredBleDevice {
 	}
 
 	public void setRssiThreshold(float threshold) {
+		Log.d(TAG, "Set threshold of " + this._address + " to " + _threshold);
 		_threshold = threshold;
 	}
 }
