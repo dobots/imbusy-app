@@ -148,7 +148,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 //			if (device != null) {
 				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
 				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
-				TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
+				final TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
 				SeekBar thresholdSlider = (SeekBar)convertView.findViewById(R.id.thresholdSlider);
 				deviceNameView.setText(device.getName());
 				deviceInfoView.setText(device.getAddress());
@@ -181,11 +181,11 @@ public class DeviceSettingsActivity extends AppCompatActivity
 						int position = (Integer)seekBar.getTag();
 						Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
 						_deviceListCopy.get(position).setRssiThreshold((float) (seekBar.getProgress() + THRESHOLD_SLIDER_MIN));
-						View parentView = (View) seekBar.getParent();
-						if (parentView != null) {
-							TextView thresholdView =(TextView)parentView.findViewById(R.id.thresholdText);
+//						View parentView = (View) seekBar.getParent();
+//						if (parentView != null) {
+//							TextView thresholdView =(TextView)parentView.findViewById(R.id.thresholdText);
 							thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
-						}
+//						}
 					}
 				});
 
