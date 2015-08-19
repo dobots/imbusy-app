@@ -126,7 +126,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 		}
 
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 			Log.d(TAG, "getView convertView=" + convertView + " position=" + position);
 			if (convertView == null) {
 				// LayoutInflater class is used to instantiate layout XML file into its corresponding View objects.
@@ -167,7 +167,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 //				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 				viewHolder.thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
 				viewHolder.thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-				viewHolder.thresholdSlider.setTag(position);
+//				viewHolder.thresholdSlider.setTag(position);
 				viewHolder.thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -179,7 +179,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 
 					@Override
 					public void onStopTrackingTouch(SeekBar seekBar) {
-						int position = (Integer)seekBar.getTag();
+//						int position = (Integer)seekBar.getTag();
 						Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
 						_deviceListCopy.get(position).setRssiThreshold((float) (seekBar.getProgress() + THRESHOLD_SLIDER_MIN));
 //						View parentView = (View) seekBar.getParent();
@@ -188,6 +188,13 @@ public class DeviceSettingsActivity extends AppCompatActivity
 							viewHolder.thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
 //							thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
 //						}
+
+						Log.d(TAG, "Stored device list:");
+						for (StoredBleDevice dev : _deviceList.values()) {
+							Log.d(TAG, dev.getAddress() + " " + dev.getRssiThreshold());
+						}
+						Log.d(TAG, "End of list");
+
 					}
 				});
 

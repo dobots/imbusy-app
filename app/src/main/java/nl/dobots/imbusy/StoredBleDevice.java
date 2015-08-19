@@ -41,7 +41,7 @@ public class StoredBleDevice {
 	}
 
 	public void setRssiThreshold(float threshold) {
-		Log.d(TAG, "Set threshold of " + this._address + " to " + _threshold);
+		Log.d(TAG, "Set threshold of " + this._address + " to " + threshold);
 		_threshold = threshold;
 	}
 }
