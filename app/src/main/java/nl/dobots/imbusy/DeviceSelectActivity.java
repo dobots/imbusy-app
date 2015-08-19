@@ -49,6 +49,18 @@ public class DeviceSelectActivity extends AppCompatActivity implements AdapterVi
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		// TODO: Start endless scan, stop interval scan
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		// TODO: Stop endless scan, start interval scan
+	}
+
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		Log.d(TAG, "onDestroy");
@@ -123,26 +135,34 @@ public class DeviceSelectActivity extends AppCompatActivity implements AdapterVi
 			return 0;
 		}
 
+		private class ViewHolder {
+			protected TextView deviceNameView;
+			protected TextView deviceInfoView;
+		}
+
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
 				//LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 				LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 				convertView = layoutInflater.inflate(R.layout.device_item, null);
+
+				// ViewHolder prevents calling findViewById too often,
+				// now it only gets called on creation of a new convertView
+				ViewHolder viewHolder = new ViewHolder();
+				viewHolder.deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
+				viewHolder.deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
+				convertView.setTag(viewHolder);
 			}
 
+			ViewHolder viewHolder = (ViewHolder)convertView.getTag();
 			BleDevice device = (BleDevice)getItem(position);
-			Log.d(TAG, "device view:");
-			Log.d(TAG, device.getAddress());
-
 
 			if (device != null) {
-				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
-				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
-				deviceNameView.setText(device.getName());
+				viewHolder.deviceNameView.setText(device.getName());
 				String infoText = getResources().getString(R.string.address_prefix) + " " + device.getAddress();
 				infoText += "\n" + getResources().getString(R.string.rssi_prefix) + " " + device.getRssi();
-				deviceInfoView.setText(infoText);
+				viewHolder.deviceInfoView.setText(infoText);
 				if (_storedDeviceList.contains(device.getAddress())) {
 					convertView.setBackgroundColor(BACKGROUND_SELECTED_COLOR);
 				}

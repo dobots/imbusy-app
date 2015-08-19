@@ -130,7 +130,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 //			Log.d(TAG, "getView convertView=" + convertView + " position=" + position);
 			if (convertView == null) {
 				// LayoutInflater class is used to instantiate layout XML file into its corresponding View objects.
-				LayoutInflater layoutInflater = (LayoutInflater) parent.getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+				LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 				convertView = layoutInflater.inflate(R.layout.device_settings_item, null);
 
 				// ViewHolder prevents calling findViewById too often,
@@ -144,10 +144,9 @@ public class DeviceSettingsActivity extends AppCompatActivity
 			}
 
 			final ViewHolder viewHolder = (ViewHolder) convertView.getTag();
-
 			final StoredBleDevice device = (StoredBleDevice)getItem(position);
 
-//			if (device != null) {
+			if (device != null) {
 				viewHolder.deviceNameView.setText(device.getName());
 				viewHolder.deviceInfoView.setText(device.getAddress());
 
@@ -173,7 +172,7 @@ public class DeviceSettingsActivity extends AppCompatActivity
 						viewHolder.thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (device.getRssiThreshold())));
 					}
 				});
-//			}
+			}
 
 			return convertView;
 		}
