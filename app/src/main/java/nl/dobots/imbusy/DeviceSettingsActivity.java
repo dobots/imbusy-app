@@ -127,12 +127,14 @@ public class DeviceSettingsActivity extends AppCompatActivity
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			Log.d(TAG, "getView convertView=" + convertView + " position=" + position);
+//			Log.d(TAG, "getView convertView=" + convertView + " position=" + position);
 			if (convertView == null) {
 				// LayoutInflater class is used to instantiate layout XML file into its corresponding View objects.
 				LayoutInflater layoutInflater = (LayoutInflater) parent.getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 				convertView = layoutInflater.inflate(R.layout.device_settings_item, null);
 
+				// ViewHolder prevents calling findViewById too often,
+				// now it only gets called on creation of a new convertView
 				ViewHolder viewHolder = new ViewHolder();
 				viewHolder.deviceNameView = (TextView) convertView.findViewById(R.id.deviceName);
 				viewHolder.deviceInfoView = (TextView) convertView.findViewById(R.id.deviceInfo);
@@ -146,28 +148,16 @@ public class DeviceSettingsActivity extends AppCompatActivity
 			final StoredBleDevice device = (StoredBleDevice)getItem(position);
 
 //			if (device != null) {
-//				TextView deviceNameView = (TextView)convertView.findViewById(R.id.deviceName);
-//				TextView deviceInfoView = (TextView)convertView.findViewById(R.id.deviceInfo);
-//				final TextView thresholdView = (TextView)convertView.findViewById(R.id.thresholdText);
-//				SeekBar thresholdSlider = (SeekBar)convertView.findViewById(R.id.thresholdSlider);
-//				deviceNameView.setText(device.getName());
-//				deviceInfoView.setText(device.getAddress());
 				viewHolder.deviceNameView.setText(device.getName());
 				viewHolder.deviceInfoView.setText(device.getAddress());
 
 				float threshold = device.getRssiThreshold();
-//				thresholdView.setText(Float.toString(device.getRssiThreshold())); // annoying format
-//				thresholdView.setText(String.format("%.2f", device.getRssiThreshold())); // trailing zeros
-//				thresholdView.setText(new DecimalFormat("#.#").format(threshold)); // Nice
-//				thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (threshold)));
+//				viewHolder.thresholdView.setText(Float.toString(device.getRssiThreshold())); // annoying format
+//				viewHolder.thresholdView.setText(String.format("%.2f", device.getRssiThreshold())); // trailing zeros
+//				viewHolder.thresholdView.setText(new DecimalFormat("#.#").format(threshold)); // Nice
 				viewHolder.thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (threshold)));
-//				thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
-//				thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-//				thresholdSlider.setTag(position);
-//				thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 				viewHolder.thresholdSlider.setMax(-THRESHOLD_SLIDER_MIN);
 				viewHolder.thresholdSlider.setProgress((int) (device.getRssiThreshold() - THRESHOLD_SLIDER_MIN));
-//				viewHolder.thresholdSlider.setTag(position);
 				viewHolder.thresholdSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 					@Override
 					public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -179,34 +169,10 @@ public class DeviceSettingsActivity extends AppCompatActivity
 
 					@Override
 					public void onStopTrackingTouch(SeekBar seekBar) {
-//						int position = (Integer)seekBar.getTag();
-//						Log.d(TAG, "position=" + position + " seekBar=" + seekBar);
-//						_deviceListCopy.get(position).setRssiThreshold((float) (seekBar.getProgress() + THRESHOLD_SLIDER_MIN));
 						device.setRssiThreshold((float) (seekBar.getProgress() + THRESHOLD_SLIDER_MIN));
-//						View parentView = (View) seekBar.getParent();
-//						if (parentView != null) {
-//							TextView thresholdView =(TextView)parentView.findViewById(R.id.thresholdText);
-//							viewHolder.thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
 						viewHolder.thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (device.getRssiThreshold())));
-//							thresholdView.setText(getResources().getString(R.string.threshold_prefix) + " " + Integer.toString((int) (_deviceListCopy.get(position).getRssiThreshold())));
-//						}
-
-						Log.d(TAG, "Stored device list:");
-						for (StoredBleDevice dev : _deviceList.values()) {
-							Log.d(TAG, dev.getAddress() + " " + dev.getRssiThreshold());
-						}
-						Log.d(TAG, "End of list");
-
 					}
 				});
-
-
-//				if (_deviceList.contains(device.getAddress())) {
-//					convertView.setBackgroundColor(BACKGROUND_SELECTED_COLOR);
-//				}
-//				else {
-//					convertView.setBackgroundColor(BACKGROUND_DEFAULT_COLOR);
-//				}
 //			}
 
 			return convertView;
