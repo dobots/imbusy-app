@@ -111,7 +111,7 @@ public class ImBusyApp extends Application {
 			_ble = new BleExt();
 		}
 		this.startService(new Intent(this, CallStateService.class));
-//		this.startService(new Intent(this, BleScanService.class));
+		this.startService(new Intent(this, BleScanService.class));
 		if (_xmppService == null) {
 			bindService(new Intent(this, XmppService.class), _xmppServiceConnection, Context.BIND_AUTO_CREATE);
 		}

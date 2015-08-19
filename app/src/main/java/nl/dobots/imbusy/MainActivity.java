@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
 		String text = getResources().getString(R.string.closest_device_prefix);
 		BleDeviceMap deviceMap = ImBusyApp.getInstance().getDeviceMap();
 		if (deviceMap != null) {
-			ArrayList<BleDevice> deviceList = deviceMap.getSortedList();
+			ArrayList<BleDevice> deviceList = deviceMap.getRssiSortedList();
 			if (deviceList != null && deviceList.size() > 0) {
 				BleDevice closestDevice = deviceList.get(0);
 				text += " " + closestDevice.getName() + " (" + closestDevice.getRssi() + " dB)";

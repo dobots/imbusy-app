@@ -36,8 +36,8 @@ public class BleScanService extends Service {
 		@Override
 		public void run() {
 //			Log.d(TAG, "Start endless scan");
-			_ble.startScan(_deviceCallback);
-			_handler.postDelayed(_stopScanRunnable, 3000);
+			_ble.startIntervalScan(_deviceCallback);
+			_handler.postDelayed(_stopScanRunnable, 1000);
 		}
 	};
 	private Runnable _stopScanRunnable = new Runnable() {
@@ -47,11 +47,11 @@ public class BleScanService extends Service {
 			_ble.stopScan(new IStatusCallback() {
 				@Override
 				public void onSuccess() {
-					_handler.postDelayed(_startScanRunnable, 1000);
+					_handler.postDelayed(_startScanRunnable, 9000);
 				}
 				@Override
 				public void onError(int error) {
-					_handler.postDelayed(_startScanRunnable, 1000);
+					_handler.postDelayed(_startScanRunnable, 9000);
 				}
 			});
 		}
@@ -102,6 +102,24 @@ public class BleScanService extends Service {
 
 		// Remove all callbacks and messages that were posted
 		_handler.removeCallbacksAndMessages(null);
+	}
+
+	public void startScan() {
+		_ble.startScan(_deviceCallback);
+	}
+
+	public void stopScan() {
+		_ble.stopScan(new IStatusCallback() {
+			@Override
+			public void onSuccess() {
+
+			}
+
+			@Override
+			public void onError(int error) {
+
+			}
+		});
 	}
 
 	public void startIntervalScan() {
