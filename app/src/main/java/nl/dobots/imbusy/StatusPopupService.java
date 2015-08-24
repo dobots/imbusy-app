@@ -44,7 +44,7 @@ public class StatusPopupService extends Service {
 		_windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
 		_statusImg = new ImageView(this);
-		_statusImg.setImageResource(R.drawable.status_busy);
+		_statusImg.setImageResource(R.drawable.status_busy_144);
 
 		WindowManager.LayoutParams params = new WindowManager.LayoutParams(
 				WindowManager.LayoutParams.WRAP_CONTENT,

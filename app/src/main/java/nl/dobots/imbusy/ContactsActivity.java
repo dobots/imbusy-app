@@ -21,6 +21,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -214,26 +216,36 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 			return 0;
 		}
 
+		private class ViewHolder {
+			protected TextView contactName;
+			protected TextView contactInfo;
+			protected ImageView statusImage;
+		}
+
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
 				//LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 				LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 				convertView = layoutInflater.inflate(R.layout.contact_item, null);
+
+				ViewHolder viewHolder = new ViewHolder();
+				viewHolder.contactName = (TextView)convertView.findViewById(R.id.contactName);
+				viewHolder.contactInfo = (TextView)convertView.findViewById(R.id.contactInfo);
+//				viewHolder.imageButton = (ImageButton)convertView.findViewById(R.id.contactImageButton);
+				viewHolder.statusImage = (ImageView)convertView.findViewById(R.id.contactStatusImage);
+				convertView.setTag(viewHolder);
 			}
 
+			ViewHolder viewHolder = (ViewHolder)convertView.getTag();
 //			final PhoneContact contact = (PhoneContact)getItem(position);
 			final XmppFriend friend = (XmppFriend)getItem(position);
 
 //			if (contact != null) {
 			if (friend != null) {
-				TextView contactNameView = (TextView)convertView.findViewById(R.id.contactName);
-				TextView contactInfoView = (TextView)convertView.findViewById(R.id.contactInfo);
+				viewHolder.contactName.setText(friend.getNick());
 
-//				contactNameView.setText(contact.getName());
-//				contactInfoView.setText(contact.getNumber());
-				contactNameView.setText(friend.getNick());
-
+				String phoneNumber = ImBusyApp.getNumber(friend.getJid());
 				String infoText = "";
 				switch (friend.getSubscriptionType()) {
 					case from:
@@ -248,7 +260,24 @@ public class ContactsActivity extends AppCompatActivity implements AdapterView.O
 						infoText = ImBusyApp.getInstance().getStatusText(ImBusyApp.getStatus(friend.getMode()));
 						break;
 				}
-				contactInfoView.setText(friend.getUsername() + "\n" + infoText);
+				viewHolder.contactInfo.setText(phoneNumber + "\n" + infoText);
+
+				// TODO: set a "+" image, clicking on it will subscribe to this person
+
+				Status status = ImBusyApp.getStatus(friend.getMode());
+				switch (status) {
+					case BUSY:
+						// TODO: this might be a bit slow, it could be better to load the png beforehand
+						viewHolder.statusImage.setImageResource(R.drawable.status_busy_48);
+						break;
+					case AVAILABLE:
+						viewHolder.statusImage.setImageResource(R.drawable.status_available_48);
+						break;
+					default:
+						// TODO: set a "?" image when not subscribed to contact
+						viewHolder.statusImage.setImageResource(android.R.color.transparent);
+				}
+
 			}
 
 			return convertView;

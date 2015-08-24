@@ -4,6 +4,7 @@
 			  android:layout_width="match_parent"
 			  android:layout_height="match_parent">
 
+	<!-- Text size is in sp! -->
 	<TextView
 		android:id="@+id/contactName"
 		android:layout_width="wrap_content"
@@ -11,7 +12,19 @@
 		android:text="ContactName"
 		android:textAppearance="?android:attr/textAppearanceLarge"
 		android:textStyle="bold"
-		android:paddingLeft="50dp"/>
+		android:layout_marginLeft="50dp"
+		android:layout_alignParentLeft="true"/>
+
+	<ImageView
+		android:layout_width="20dp"
+		android:layout_height="20dp"
+		android:id="@+id/contactStatusImage"
+		android:layout_alignParentLeft="true"
+		android:layout_alignBottom="@id/contactName"
+		android:paddingRight="0dp"
+		android:layout_marginLeft="25dp"
+		android:scaleType="centerInside"/>
+
 	<TextView
 		android:id="@+id/contactInfo"
 		android:layout_width="wrap_content"
@@ -21,5 +34,13 @@
 		android:paddingLeft="25dp"
 		android:layout_below="@id/contactName"/>
 
+<!--
+	<ImageButton
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/contactImageButton"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"/>
+-->
 
 </RelativeLayout>
