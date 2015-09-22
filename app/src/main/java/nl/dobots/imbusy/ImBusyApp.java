@@ -23,9 +23,9 @@ import org.jivesoftware.smack.packet.Presence;
 import java.util.HashSet;
 import java.util.Set;
 
-import nl.dobots.bluenet.extended.BleExt;
-import nl.dobots.bluenet.extended.structs.BleDevice;
-import nl.dobots.bluenet.extended.structs.BleDeviceMap;
+import nl.dobots.bluenet.ble.extended.BleExt;
+import nl.dobots.bluenet.ble.extended.structs.BleDevice;
+import nl.dobots.bluenet.ble.extended.structs.BleDeviceMap;
 
 /**
  * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.

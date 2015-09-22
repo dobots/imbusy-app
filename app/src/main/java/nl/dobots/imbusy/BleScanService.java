@@ -6,10 +6,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import nl.dobots.bluenet.callbacks.IBleDeviceCallback;
-import nl.dobots.bluenet.callbacks.IStatusCallback;
-import nl.dobots.bluenet.extended.BleExt;
-import nl.dobots.bluenet.extended.structs.BleDevice;
+import nl.dobots.bluenet.ble.base.callbacks.IStatusCallback;
+import nl.dobots.bluenet.ble.extended.BleExt;
+import nl.dobots.bluenet.ble.extended.callbacks.IBleDeviceCallback;
+import nl.dobots.bluenet.ble.extended.structs.BleDevice;
 
 /**
  * Copyright (c) 2015 Bart van Vliet <bart@dobots.nl>. All rights reserved.
@@ -36,7 +36,7 @@ public class BleScanService extends Service {
 
 	private IBleDeviceCallback _deviceCallback = new IBleDeviceCallback() {
 		@Override
-		public void onSuccess(BleDevice device) {
+		public void onDeviceScanned(BleDevice device) {
 //				Log.i(TAG, device.getAddress());
 			ImBusyApp.getInstance().onScannedDevice(device);
 		}
